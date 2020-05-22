@@ -12,7 +12,11 @@ from numpy.fft import fft2,ifft2,fftfreq
 from numpy import linalg as la
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
+import seaborn as sns
+from tqdm import tqdm
 import scipy.constants as cn
+import warnings
+warnings.simplefilter('ignore')
 
 
 # Defining size of x space
@@ -35,8 +39,8 @@ psi=0.5*np.exp(-(x**2+y**2))
 
 # Defining potential operator V
 w=1 # Angular velocity
-g=0 # Contact coefficient
-Cdd=50 # Dipole-dipole interaction coefficient
+g=50 # Contact coefficient
+Cdd=0 # Dipole-dipole interaction coefficient
 
 def Vdd(psi): # Dipole interaction energy
     Rc=10 # Circular cut off should be greater than system size
@@ -81,7 +85,7 @@ expT=np.exp(-1j*T*dt)
 isConv=0;
 i=1;
 
-while isConv==0 and i<100: # Loop until convergence or limit reached
+for i in tqdm(range(100)): # Loop until convergence or limit reached
     
     psi=expVh*ifft2(expT*fft2(expVh*psi)) # Split step Fourier method  
     psi/=la.norm(psi) 
@@ -104,5 +108,10 @@ plt.ylabel("y")
 ax.set_title("Ground state wavefunction")
 plt.show()
     
-
+# Plot heatmap
+ax = sns.heatmap(psi.real, xticklabels=x1d, yticklabels=x1d)
+ax.set_xticks(ax.get_xticks()[::5])
+ax.set_xticklabels(x1d[::5])
+ax.set_yticks(ax.get_yticks()[::5])
+ax.set_yticklabels(x1d[::5])
 
