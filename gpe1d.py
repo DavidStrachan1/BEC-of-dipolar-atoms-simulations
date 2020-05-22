@@ -29,18 +29,31 @@ psi=0.5*np.exp(-x**2)
 #psi=np.cos(cn.pi*x/20)
 
 
-# Defining potential V and kinetic energy T
+# Defining potential operator V
 w=1 # Angular velocity
-#V=0.5*w**2*x**2
+g=10 # Contact coefficient
+Cdd=0 # Dipole-dipole interaction coefficient
+
+def Vdd(psi): # Dipole interaction energy
+    Rc=10 # Circular cut off should be greater than system size
+    Uddf=1/3*Cdd*np.nan_to_num((1+3*np.cos(Rc*k)/(Rc*k)**2-3*np.sin(Rc*k)/(Rc*k)**3)\
+        *(3*(0)**2 -1)) # FT of the dipole energy. Assumes polarsation along x
+    
+    return ifft(Uddf*fft(np.abs(psi)**2))
+
+def V(psi): # Harmonic potential  
+    return 0.5*w**2*x**2 + g*np.abs(psi)**2 + Vdd(psi)
+
 #V=np.zeros(N)
-V=x**(20)
+#V=x**(20)
 #V[0]=1e6
 #V[N-1]=1e6
+
+# Defining kinetic energy operator T
 T=0.5*k**2
 
 # Defining operators
-expVh=np.exp(-0.5j*V*dt)
-expV=np.exp(-1j*V*dt)
+expVh=np.exp(-0.5j*V(psi)*dt)
 expT=np.exp(-1j*T*dt)
 
 # Create historical psi array
@@ -80,25 +93,3 @@ plt.plot(x,psi,color="k",label="Numerical result")
 plt.xlabel("Distance")
 plt.ylabel("Wavefunction")
 plt.legend(loc="upper right")
-
-""" Eigenvalue stuff
-
-H=np.array([[5,1],
-            [4,4]])
-
-
-# Eigenvalues of H
-e=[0];
-
-e[0]=np.linalg.eig(H)[0][0]
-e.append(np.linalg.eig(H)[0][1])
-
-realE=min(e)
-
-for i in range(1,10):
-    psi=psi-dt*H@psi
-    psi=psi/np.linalg.norm(psi)
-    E=psi@H@np.transpose(psi)
-    
-"""
-    
