@@ -23,85 +23,80 @@ warnings.simplefilter('ignore')
 x1d=np.linspace(-5,5,101)
 N=len(x1d)
 dx=(x1d[N-1]-x1d[0])/(N-1)
-x=np.outer(x1d,np.ones(N)) # makes a NxN matrix of x
-y=x.T # y is transpose of x
+xv,yv=np.meshgrid(x1d,x1d) # makes a NxN matrix of x
 dt=-0.1j # Imaginary time propagation
 
 # Setting up k space
 k1d=fftfreq(N,dx/(2*cn.pi))
-kx=np.outer(k1d,np.ones(N)) # makes a Nxn matrix of k
-ky=kx.T # ky as transpose of kx
+kx,ky=np.meshgrid(k1d,k1d) # makes a NxN matrix of k
 kmag=(kx**2+ky**2)**0.5 # magnitude of k
 
 # Guess initial psi as gaussian
-psi=0.5*np.exp(-(x**2+y**2))
-#psi=np.cos(cn.pi*x/20)*np.cos(cn.pi*y/20)
+psi=0.5*np.exp(-(xv**2+yv**2))
+#psi=np.cos(cn.pi*xv/20)*np.cos(cn.pi*yv/20)
+#psi=np.ones((N,N))
 
 # Defining potential operator V
-w=1 # Angular velocity
-g=50 # Contact coefficient
+wx=1 # Angular velocities
+wy=1
+g=0 # Contact coefficient
 Cdd=0 # Dipole-dipole interaction coefficient
 
 def Vdd(psi): # Dipole interaction energy
-    Rc=10 # Circular cut off should be greater than system size
+    Rc=5 # Circular cut off should be greater than system size
     Uddf=1/3*Cdd*np.nan_to_num((1+3*np.cos(Rc*kmag)/(Rc*kmag)**2-3*np.sin(Rc*kmag)/(Rc*kmag)**3)\
         *(3*(kx/kmag)**2 -1)) # FT of the dipole energy. Assumes polarsation along x
     
     return ifft2(Uddf*fft2(np.abs(psi)**2))
 
-def V(psi): # Harmonic potential
-    return 0.5*w**2*(x**2+y**2) + g*np.abs(psi)**2 + Vdd(psi)
-"""
-def V(psi): # Box potential
-    V=np.outer(np.zeros(N),np.ones(N))
-    V[0][:]=1e6
-    V[N-1][:]=1e6
-    for i in range(N): V[i][0]=1e6
-    for i in range(N): V[i][N-1]=1e6
-    for i in range(N):
-        for j in range(N):
-            V[i][j]+=g*psi[i][j]**2 + Vdd(psi)[i][j]
-    return V
-"""
+def expVh(psi): # Harmonic potential
+    V= 0.5*((wx*xv)**2+(wy*yv)**2) + g*np.abs(psi)**2 + Vdd(psi)
+    return np.exp(-0.5j*V*dt)
+
+
+#def expVh(psi): # Box potential
+ #   V=((1/4.75)*xv)**1000 + ((1/4.75)*yv)**1000 + g*np.abs(psi)**2 + Vdd(psi)
+  #  return np.exp(-0.5j*V*dt)
+
 """
 # Circular potential
-def V(psi):
+def expVh(psi):
     r=3 # Radius of circlar potential
-    V=np.outer(np.ones(N)*1e6,np.ones(N))
-    binaryMap= x**2 + y**2 <=r**2
+    V=np.outer(np.ones(N)*1e6,np.ones(N)).astype("complex128")
+    binaryMap= xv**2 + yv**2 <=r**2 
     for i in range(N):
         for j in range(N):
-            if binaryMap[i][j]==True:
-                V[i][j]=g*psi[i][j]**2 + Vdd(psi)[i][j]
-    return V
+            if binaryMap[i][j]==True: # V=0 for all points inside the circle
+                V[i][j]=0
+                
+    V+=g*np.abs(psi)**2 + Vdd(psi)
+    return np.exp(-0.5j*V*dt)
 """
 
 T=0.5*(kx**2+ky**2) # Defining kinetic energy operator T
 
 # Defining operators
-expVh=np.exp(-0.5j*V(psi)*dt)
 expT=np.exp(-1j*T*dt)
 
-isConv=0;
 i=1;
 
 for i in tqdm(range(100)): # Loop until convergence or limit reached
     
-    psi=expVh*ifft2(expT*fft2(expVh*psi)) # Split step Fourier method  
+    psi=expVh(psi)*ifft2(expT*fft2(expVh(psi)*psi)) # Split step Fourier method  
     psi/=la.norm(psi) 
     i+=1
-
-# Plotting results
     
+# Plotting results  
 fig=plt.figure()
 ax=plt.axes(projection="3d")
-ax.plot_surface(x,y,psi.real,cmap="jet")
+ax.plot_surface(xv,yv,psi.real,cmap="jet")
 
-#actual=np.exp(-0.5*(x**2+y**2))
-actual=np.cos(cn.pi*x/10)*np.cos(cn.pi*y/10)
+actual=np.exp(-0.5*(wx*xv**2+wy*yv**2))
+#actual=np.cos(cn.pi*x/10)*np.cos(cn.pi*y/10)
 actual/=la.norm(actual)
 psidiff=psi.real-actual
-#ax.plot_surface(x,y,psidiff,cmap="jet")
+#ax.plot_surface(x,y,actual,cmap="jet")
+
 
 plt.xlabel("x")
 plt.ylabel("y")
@@ -109,7 +104,7 @@ ax.set_title("Ground state wavefunction")
 plt.show()
     
 # Plot heatmap
-ax = sns.heatmap(psi.real, xticklabels=x1d, yticklabels=x1d)
+#ax = sns.heatmap(psi.real, xticklabels=x1d, yticklabels=x1d)
 ax.set_xticks(ax.get_xticks()[::5])
 ax.set_xticklabels(x1d[::5])
 ax.set_yticks(ax.get_yticks()[::5])

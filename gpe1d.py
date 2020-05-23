@@ -25,13 +25,15 @@ dt=-0.1j # Imaginary time propagation
 k=fftfreq(N,dx/(2*cn.pi)) 
 
 # Guess initial psi as gaussian
-psi=0.5*np.exp(-x**2)
+#psi=0.5*np.exp(-x**2)
+psi=np.ones(N)
+#psi=x**2
 #psi=np.cos(cn.pi*x/20)
 
 
 # Defining potential operator V
 w=1 # Angular velocity
-g=10 # Contact coefficient
+g=0 # Contact coefficient
 Cdd=0 # Dipole-dipole interaction coefficient
 
 def Vdd(psi): # Dipole interaction energy
@@ -41,19 +43,21 @@ def Vdd(psi): # Dipole interaction energy
     
     return ifft(Uddf*fft(np.abs(psi)**2))
 
-def V(psi): # Harmonic potential  
-    return 0.5*w**2*x**2 + g*np.abs(psi)**2 + Vdd(psi)
+#def expVh(psi): # Harmonic potential
+ #   V=0.5*w**2*x**2 + g*np.abs(psi)**2 + Vdd(psi)
+  #  return np.exp(-0.5j*V*dt)
+  
 
-#V=np.zeros(N)
-#V=x**(20)
-#V[0]=1e6
-#V[N-1]=1e6
+def expVh(psi): # Box potential
+
+    V=((1/4.75)*x)**1000 + g*np.abs(psi)**2 + Vdd(psi)
+    return np.exp(-0.5j*V*dt)
+
 
 # Defining kinetic energy operator T
 T=0.5*k**2
 
 # Defining operators
-expVh=np.exp(-0.5j*V(psi)*dt)
 expT=np.exp(-1j*T*dt)
 
 # Create historical psi array
@@ -62,9 +66,9 @@ histpsi=[[0,psi[0],psi[int(round(N/2))],psi[N-1]]]
 isConv=0;
 i=1;
 
-while isConv==0 and i<1000: # Loop until convergence or limit reached
+while isConv==0 and i<100: # Loop until convergence or limit reached
     
-    psi=expVh*ifft(expT*fft(expVh*psi)) # Split step Fourier method
+    psi=expVh(psi)*ifft(expT*fft(expVh(psi)*psi)) # Split step Fourier method
     psi/=la.norm(psi)
      
     # Add psi to the history of psi
@@ -73,7 +77,7 @@ while isConv==0 and i<1000: # Loop until convergence or limit reached
     # Checking for convergence
     if abs(histpsi[i][1]-histpsi[i-1][1])<1e-6 and abs(histpsi[i][2]-histpsi[i-1][2])<1e-6\
         and abs(histpsi[i][3]-histpsi[i-1][3])<1e-6:
-        isConv=1
+        isConv=0
         
     i+=1
   
@@ -84,11 +88,11 @@ yhist=[i[2] for i in histpsi]
 # Plotting results
     
 #actual=np.exp(-0.5*x**2)
-actual=np.cos(cn.pi*x/2)
+actual=np.cos(cn.pi*x/10)
 actual/=la.norm(actual)
 diff=psi-actual
 plt.plot(x,psi,color="k",label="Numerical result")
-#plt.plot(x,actual,color="g",label="Actual result") 
+plt.plot(x,actual,color="g",label="Actual result") 
 #plt.plot(x,diff,color="orange",label="Difference between numerical and actual results")  
 plt.xlabel("Distance")
 plt.ylabel("Wavefunction")
