@@ -4,7 +4,8 @@ Created on Fri May 15 20:50:35 2020
 
 @author: ganda
 
-Solution of time independant Schrödinger equation using imaginary time propagation
+Modelling a dipolar Bose-Einstein condensate by finding the solution of the 
+time dependant Schrödinger equation using imaginary time propagation
 and the split step Fourier method in 2D
 """
 import numpy as np
@@ -20,11 +21,11 @@ warnings.simplefilter('ignore')
 
 
 # Defining size of x space
-x1d=np.linspace(-5,5,101)
+x1d=np.linspace(-5,5,100)
 N=len(x1d)
-dx=(x1d[N-1]-x1d[0])/(N-1)
+dx=(x1d[N-1]-x1d[0])/N
 xv,yv=np.meshgrid(x1d,x1d) # makes a NxN matrix of x
-dt=-0.1j # Imaginary time propagation
+dt=-0.01j # Imaginary time propagation
 
 # Setting up k space
 k1d=fftfreq(N,dx/(2*cn.pi))
@@ -45,14 +46,13 @@ Cdd=0 # Dipole-dipole interaction coefficient
 def Vdd(psi): # Dipole interaction energy
     Rc=5 # Circular cut off should be greater than system size
     Uddf=1/3*Cdd*np.nan_to_num((1+3*np.cos(Rc*kmag)/(Rc*kmag)**2-3*np.sin(Rc*kmag)/(Rc*kmag)**3)\
-        *(3*(kx/kmag)**2 -1)) # FT of the dipole energy. Assumes polarsation along x
+        *(3*(kx/kmag)**2 -1)) # FT of the dipole energy. Assumes polarisation along x
     
     return ifft2(Uddf*fft2(np.abs(psi)**2))
 
-def expVh(psi): # Harmonic potential
-    V= 0.5*((wx*xv)**2+(wy*yv)**2) + g*np.abs(psi)**2 + Vdd(psi)
-    return np.exp(-0.5j*V*dt)
-
+#def expVh(psi): # Harmonic potential
+ #   V=0.5*((wx*xv)**2+(wy*yv)**2) + g*np.abs(psi)**2 + Vdd(psi)
+  #  return np.exp(-0.5j*V*dt)
 
 #def expVh(psi): # Box potential
  #   V=((1/4.75)*xv)**1000 + ((1/4.75)*yv)**1000 + g*np.abs(psi)**2 + Vdd(psi)
@@ -63,7 +63,7 @@ def expVh(psi): # Harmonic potential
 def expVh(psi):
     r=3 # Radius of circlar potential
     V=np.outer(np.ones(N)*1e6,np.ones(N)).astype("complex128")
-    binaryMap= xv**2 + yv**2 <=r**2 
+    binaryMap= xv**2 + yv**2 <=r**2 # All points inside the circle are True
     for i in range(N):
         for j in range(N):
             if binaryMap[i][j]==True: # V=0 for all points inside the circle
@@ -74,17 +74,12 @@ def expVh(psi):
 """
 
 T=0.5*(kx**2+ky**2) # Defining kinetic energy operator T
-
-# Defining operators
 expT=np.exp(-1j*T*dt)
-
-i=1;
 
 for i in tqdm(range(100)): # Loop until convergence or limit reached
     
     psi=expVh(psi)*ifft2(expT*fft2(expVh(psi)*psi)) # Split step Fourier method  
     psi/=la.norm(psi) 
-    i+=1
     
 # Plotting results  
 fig=plt.figure()
@@ -92,10 +87,10 @@ ax=plt.axes(projection="3d")
 ax.plot_surface(xv,yv,psi.real,cmap="jet")
 
 actual=np.exp(-0.5*(wx*xv**2+wy*yv**2))
-#actual=np.cos(cn.pi*x/10)*np.cos(cn.pi*y/10)
+#actual=np.cos(cn.pi*xv/10)*np.cos(cn.pi*yv/10)
 actual/=la.norm(actual)
 psidiff=psi.real-actual
-#ax.plot_surface(x,y,actual,cmap="jet")
+#ax.plot_surface(xv,yv,psidiff,cmap="jet")
 
 
 plt.xlabel("x")
@@ -105,8 +100,9 @@ plt.show()
     
 # Plot heatmap
 #ax = sns.heatmap(psi.real, xticklabels=x1d, yticklabels=x1d)
-ax.set_xticks(ax.get_xticks()[::5])
-ax.set_xticklabels(x1d[::5])
-ax.set_yticks(ax.get_yticks()[::5])
-ax.set_yticklabels(x1d[::5])
+ax.set_xticks(ax.get_xticks()[::5].astype(int))
+ax.set_xticklabels(x1d[::5].astype(int))
+ax.set_yticks(ax.get_yticks()[::5].astype(int))
+ax.set_yticklabels(x1d[::5].astype(int))
 
+#print("Average error: ",np.abs(np.mean(psidiff)))
