@@ -1,0 +1,42 @@
+\documentclass[12pt]{article}
+
+\begin{document}
+\title{Dipolar BEC simulations}
+\maketitle
+\section{basic strucure of code with no interactions in cartesian coordinates}
+This is a very basic and quickly put together summary of our methods, it's not thorough and can easily be expanded and more detailed.
+
+Firstly, all the parameters (number of points, frequency etc) are defined at the start and can easily be adjusted. For 1D, a linear array is defined from over the range in position space wanted, and a linear array in k space is defined using the fftfreq function. For higher dimensions, these are simply repeated over the other dimensions with y and z arrays defined in the same way but along the different axes. We convert into dimensionless units using the length scale $xs = \sqrt{\frac{\hbar}{m\omega}}$. The harmonic potential is then defined as 
+\begin{equation}
+V(r) = \frac{1}{2}x^{2}+\frac{(\gamma_yy)^{2}}{2}+\frac{(\gamma_zz)^{2}}{2}
+\end{equation}
+and the kinetic term is defined in k space as 
+\begin{equation}
+T(k) = \frac{1}{2}k^{2}
+\end{equation} 
+We use an initial guess of a gaussian but this can be any function that is non zero at the origin and is symmetric. The split step fourier method is then used with imaginary time propagation, and after each iteration $\psi$ is normalised. This repeats until convergence, and the solutions are plotted against the true ground state.
+\section{contact and dipolar interactions}
+The contact interaction term is very simple to code, the potential becomes 
+\begin{equation}
+V(r) = \frac{1}{2}r^{2}+gs|\psi|^{2}
+\end{equation}
+where gs is g in dimensionless coordinates. Before every step $\psi$ is normalised to ensure terms that are functions of $\psi$ have the same weighting.
+ 
+The dipolar term involves integrating $U_{dd}$ with $|\psi|^{2}$ over all space, which can be treated as a convolution. This is easily evaluated in k space, and we code it as a function. We introduce a spherical cut off in position space to prevent alias copies, which leads to the following expression in k space 
+\begin{equation}
+U_{dd}(k) = \frac{Cdd}{3}[1+3\frac{\cos(R_{c}k)}{(R_{c}k)^{2}}-3\frac{\sin(R_{c}k)}{(R_{c}k)^{3}}](3\cos{\theta_k}^{2}-1)
+\end{equation} 
+This works for near-spherical traps, but if the trap is pancake like, a cylindrical cut off is needed, which will be discussed later.
+The potential becomes
+\begin{equation}
+V(r) = \frac{1}{2}r^{2}+gs|\psi|^{2}+dd_{cont}(\psi)
+\end{equation}
+where 
+
+\begin{equation}
+dd_{cont}(\psi) = F^{-1}(U_{dd}(k)|\psi(k)|^{2})
+\end{equation}
+\section{Hankel Transform}
+If the dipole polarisation is along the z axis, the ground state will be cylindrically symmetric in a harmonic trap (or circular box potential). This can reduce a 3D system to an effective 2D system, where only the r and z coordinates are needed. If we are in cylindrical coordinates, the space where the r component of the laplacian operator is diagonalised is bessel space. To transform from position space to bessel space, we use a Hankel transform. Python has a built in Hankel transform, but it can only be applied to given functions rather than our general data. We found a paper Ref[1] which outlined a very efficient numerical method to create a Hankel transform given a finite range of r. 
+\end{document}
+
