@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.6) (preloaded format=pdflatex 2020.6.30)  3 JUL 2020 16:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.6) (preloaded format=pdflatex 2020.6.30)  4 JUL 2020 12:48
 entering extended mode
 **"C:/Users/david/OneDrive/Documents/UNI/BEC project/notes on coding.tex"
 ("C:/Users/david/OneDrive/Documents/UNI/BEC project/notes on coding.tex"
@@ -160,7 +160,26 @@ Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 85.
 )
-! Undefined control sequence.
-l.8 \Author
-           {David Strachan}
+LaTeX Font Info:    Trying to load font information for U+msa on input line 10.
+
+
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 10.
+
+
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+[1
+
+{C:/Users/david/AppData/Local/MiKTeX/pdftex/config/pdftex.map}] [2] [3]
+[4] [5]
+! Missing $ inserted.
+<inserted text> 
+                $
+l.130 ...ime is still measured in terms of $\omega
+                                                  -{0}$. However I think we ...
+
 ? 
