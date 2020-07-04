@@ -1,10 +1,15 @@
 \documentclass[12pt]{article}
-
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\graphicspath{{C:/Documents/UNI/BEC project/diagram/}}
 \begin{document}
+\author{ David Strachan and Edward Gandar }
 \title{Dipolar BEC simulations}
+
 \maketitle
 \section{basic strucure of code with no interactions in cartesian coordinates}
-This is a very basic and quickly put together summary of our methods, it's not thorough and can easily be expanded and more detailed.
+This is a very basic and quickly put together summary of our methods, it's not thorough and can easily be expanded and more detailed. In terms of the comparison between the codes that you mentioned in the email,we haven't finished various parts of the code and are having various issues, but I think we should be able to do this within the next week. This only covers the harmonic case and obviously the hard wall potential is likely more important, but the structures are very similar and we've mainly been working with the harmonic case more recently. Lots of the issues/structure of the code apply to both cases.
 
 Firstly, all the parameters (number of points, frequency etc) are defined at the start and can easily be adjusted. For 1D, a linear array is defined from over the range in position space wanted, and a linear array in k space is defined using the fftfreq function. For higher dimensions, these are simply repeated over the other dimensions with y and z arrays defined in the same way but along the different axes. We convert into dimensionless units using the length scale $xs = \sqrt{\frac{\hbar}{m\omega}}$. The harmonic potential is then defined as 
 \begin{equation}
@@ -37,6 +42,111 @@ where
 dd_{cont}(\psi) = F^{-1}(U_{dd}(k)|\psi(k)|^{2})
 \end{equation}
 \section{Hankel Transform}
-If the dipole polarisation is along the z axis, the ground state will be cylindrically symmetric in a harmonic trap (or circular box potential). This can reduce a 3D system to an effective 2D system, where only the r and z coordinates are needed. If we are in cylindrical coordinates, the space where the r component of the laplacian operator is diagonalised is bessel space. To transform from position space to bessel space, we use a Hankel transform. Python has a built in Hankel transform, but it can only be applied to given functions rather than our general data. We found a paper Ref[1] which outlined a very efficient numerical method to create a Hankel transform given a finite range of r. 
+If the dipole polarisation is along the z axis, the ground state will be cylindrically symmetric in a harmonic trap (or circular box potential). This can reduce a 3D system to an effective 2D system, where only the r and z coordinates are needed. If we are in cylindrical coordinates, the space where the r component of the laplacian operator is diagonalised is bessel space. To transform from position space to bessel space, we use a Hankel transform. Python has a built in Hankel transform, but it can only be applied to given functions rather than our general data. We found a paper Ref[1] which outlined a very efficient numerical method to create a Hankel transform given a finite range of r. We assume we can rewrite the function in both position space $f(r)$ and bessel space $g(\rho)$ as a Dini series. If $0<r<b$ and $0<\rho<\beta$ then we can write f(r) and $g(\rho)$ as
+\begin{equation}
+f(r) = \frac{2}{b^{2}}\sum_{n=0}^{\infty}f_{n}J_{0}^{-2}(\alpha_{n})J_{0}(\frac{\alpha_{n}r}{b})
+\end{equation}
+\begin{equation}
+g(\rho) = \frac{2}{\beta^{2}}\sum_{n=0}^{\infty}g_{n}J_{0}^{-2}(\alpha_{n})J_{0}(\frac{\alpha_{n}\rho}{\beta})
+\end{equation}
+where 
+\begin{equation}
+f_{n} = \int_{0}^{b}rf(r)J_{0}(\frac{\alpha_{n}r}{b})dr=\frac{1}{2\pi}g(\frac{\alpha_{n}}{2\pi b})
+\end{equation}
+and
+\begin{equation}
+g_{n} = \int_{0}^{\beta}\rho g(\rho)J_{0}(\frac{\alpha_{n}\rho}{\beta})d\rho=\frac{1}{2\pi}f(\frac{\alpha_{n}}{2\pi\beta})
+\end{equation}
+where $\alpha_{n}$ are the real nonnegative roots of the derivative of the zero-order Bessel function, $\alpha_{0}=0$. We can truncate these infinite sums to finite ones by using the fact that if $\alpha_{N} >S$ where $S=2\pi b\beta$, both $f_{N}$ and $g_{N}$ are zero.
+
+Defining a change of variables, 
+\begin{equation}
+G(m) = g(\frac{\alpha_{m}}{2\pi b})|J_{0}^{-1}(\alpha_{m})|\beta
+\end{equation}
+\begin{equation}
+F(n) = f(\frac{\alpha_{n}}{2\pi \beta})|J_{0}^{-1}(\alpha_{n})|b
+\end{equation}
+leads to the following formula for the discrete Hankel transform and its inverse,
+\begin{equation}
+G(m) = \sum_{n=0}^{N}c_{mn}F(n)
+\end{equation}
+\begin{equation}
+F(n) =  \sum_{n=0}^{N}c_{nm}G(m)
+\end{equation}
+where $c_{nm}$ are the elements of a transform matrix, 
+\begin{equation}
+c_{nm} = \frac{2}{S}|J_{0}^{-1}(\alpha_{n})||J_{0}^{-1}(\alpha_{m})|J_{0}(\frac{\alpha_{n}\alpha_{m}}{S})
+\end{equation}
+For this to hold, the matrix C has to satisfy $CC =I$, and C is a function of S only so S must be chosen correctly. In ref[1] they state that the optimum choice is 
+\begin{equation}
+S = 2|J_{0}^{-1}(\alpha_{k})|\sqrt(1+\sum_{n=1}^{N}J_{0}^{-2}(\alpha_{n})J_{0}^{2}(\frac{\alpha_{k}\alpha_{n}}{J_{N+1}}))
+\end{equation}
+where 
+\begin{equation}
+k = Int(\frac{N}{4})
+\end{equation}
+Despite redefining S in a different way, as long as $S<\alpha_{N+1}$, this approach is still valid.
+
+
+ To code this, we  define C and S along with N at the start so we only need to run this when we want to change N. Then we simply replace the fft2 function by this transform and the code runs the same. We have to redefine normalisation and the GPE slightly to have the reduced dimensions and be in cylindrical coordinates (the g factor must be divided by $2\pi$).
+\section{Using Hankel transform in 3D}
+
+In 3D, we reshape the r array to be 2D, repeating along the 2nd axis and create a 2D z array which repeats over the other axis. The main difference is within the loop. We apply half the potential on position space, transform to fourier space along the 2nd axis (axis = 1 in python) and apply the z component of the kinetic energy and then inverse transform back to position space. We then transform to bessel space by applying a Hankel transform along the 1st axis, and then we apply the radial kinetic term. Finally, we transform back to position space and apply the second half of the potential. This is then iterated until convergence.
+
+\section{Accuracy with no interactions}
+Using the Hankel transform in 2D (1D computationally), we achieve very accurate results compared to the harmonic oscillator ground state.
+INSERT GRAPHS HERE
+Using the 2d fourier transform, we also achieve very accurate results.
+INSERT GRAPHS HERE
+\section{contact interactions}
+Comparing the 2D code using the Hankel transform and the code using the 2D fourier transforms, at the moment there is a slight discrepancy between the two. They both are within around $0.001\%$ accuracy or higher for no interactions so it must be an issue with how the contact term is coded. One difference between the two codes is the r array for the Hankel code is based on the zeros of the Bessel function which isn't perfectly uniform, but this gets less significant with high N.
+\section{contact and dipole interactions}
+Recently checking this code has given the correct results if we include an arbitary minus sign, but this is most likely meant to be there and the code is incorrect because for 2D it should always be repulsive but currently is always attractive. This will probably be solved before monday.
+\section{purely dipolar interactions}
+Again, the same issue as above.
+\section{Quasi 2D approach}
+The structure of the code for this is the same for the 2d cases with Hankel and 2d fourier transforms, but with modified interaction terms. I mainly use the method described in ref[2] and ref[3] in sections [INSERT SECTIONS] as these allow for an arbitary polarisation direction and the method is fairly straightforward. I realise this is different to a few of the papers you reccomended, so I'd be happy to switch if this doesn't work but it seems to work fairly well.The derivation of the results are laid out in ref[2] and ref[3] [INSERT SECTIONS], and the equation I base the code on is 8.19 in the Bao paper ref[2]. 
+The modifications to the code is $gs$ replaced by $\beta_{2D}$ which is defined as 
+\begin{equation}
+\beta_{2D}=\frac{\beta -\lambda +3\lambda n_{3}^{2}}{\sqrt{2\pi}\epsilon}
+\end{equation}
+where 
+\begin{equation}
+\epsilon = \frac{1}{\gamma},
+\end{equation}
+
+\begin{equation}
+\beta=\frac{Ng}{\hbar\omega_{0}x_{s}^{3}},
+\end{equation}
+\begin{equation}
+\lambda=\frac{mNC_{dd}}{3\hbar^{2}x_{s}}
+\end{equation}
+The long range component of the dipole contribution in the Quasi 2D regime is most easily evaluated in k space, so in the code we define a function that includes both the T contribution and the $\nabla^{2}$ terms of the dipole contribution, in the form of the exponential needed for the split step method.
+For the quasi 2D approach, it seems to be heavily dependent on the parameters used as to whether it gives sensible results which is obviously a stability issue, but when different polarisation directions are used it acts in the correct way. When we have completed the stability analysis this should be easily solved.
+\section{graphing the results}
+For most of the orientations of the code, we plot the analytical ground state for no interactions to show the effects of certain interaction terms easily. We have various surface, contour and simple 2D plots, but this can definitely be improved. 
+\section{General questions/notes}
+For spacial resolution, I haven't found any mention of a minimum resolution needed and haven't coded anything to work this out, especially as it seems it heavily depends on what situation/interactions the simulation has. But in general, accuracy increases with N.
+For (imaginary time resolution), in terms of the validity of the split step method validity, it has an error of $(\delta t)^{3}$ so using $|\delta t| = 0.1$ or less gives very low errors where this is measured in the units of $\frac{1}{\omega_{0}}$. If we are in the 3D regime with $\gamma=\frac{\omega_{z}}{\omega_{0}}$ I think we would need to divide our previous time step by $\gamma$ as our time is still measured in terms of $\omega_{0}$. However I think we need to consider the comparative magnitudes of all the terms involved in the time step method compared to the resolution of the computer. If we use float64, I think if two different terms vary by 20 orders of magnitude ($2^{64}$) then we will lose accuracy, If you could confirm/elaborate on this that would be very useful. If this is true, I think we need to need to be more conscious of the magnitude of the intial guess, as we don't want it to be too large for the contact and/or the dipole term. 
+
+
+\section{References}
+[1] - A quasi-discrete Hankel transform for nonlinear beam propagation-You Kai-Ming et al 2009 Chinese Phys. B 18 3893
+
+[2] - Mathematical Theory and numerical Methods for Bose-Einstein Condensation-https://arxiv.org/pdf/1212.5341.pdf
+
+[3] - Mean-field regime of trapped dipolar Bose-Einstein condensates in one and two dimensions-Yongyong Cai, Matthias Rosenkranz,, Zhen Lei, and Weizhu Bao-PACS numbers: 03.75.Hh, 75.80.+q, 67.85.-d 
+ 
+
+This probably isn't how you reference.
+%\begin{equation}
+%i \frac{\partial \psi(r,t)}{\partial t}= \left(-\frac{1}{2} \nabla^2+\frac{1}{2}r^{2}+\beta_{2D}|\psi|^{2}-\frac{3\lamda}{2}(\partial_{nn}-n_{3}^{2}\nabla^{2})((-%\nabla^{2})^{-\frac{1}{2}}|\psi|^{2})) \psi(r,t),
+%\end{equation}
+
+
+
+
+
+
 \end{document}
 
