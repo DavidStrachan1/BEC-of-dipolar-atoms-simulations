@@ -134,6 +134,8 @@ for i in range(len(gammas)):
             gamma=gammas[i]
             D=dipoles[j]
             
+            #dt=dt/gamma
+            
             isConv=False
             p=1
             
@@ -147,10 +149,17 @@ for i in range(len(gammas)):
                 
                 
                 # Add psi to the history of psi              
-                hist_psi.append([p,psi]) 
+                hist_psi.append([p,psi])
+                
+                val1=abs(np.mean(hist_psi[p][1]))
+                val2=abs(np.mean(hist_psi[p-1][1]))
+                
+                diff=val2-val1
+                
+                percent_change=100*np.abs((val2-val1))/val1
             
                 # Checking for convergence     
-                if abs(np.mean(hist_psi[p][1])-np.mean(hist_psi[p-1][1]))<1e-10:
+                if percent_change < 1: # Will run if the wavefunction changes by less than 1%
                     isConv=True
                     stable_matrix[i][j]=1 # Runs if wavefunction has converged
                     
@@ -162,6 +171,14 @@ for i in range(len(gammas)):
                     stable_matrix[i][j]=1 # Runs if wavefunction has converged
                 """    
                 p+=1
+                
+# TODO                
+                
+# New wavefunction is old wavefunction (better ansatz)
+
+# Convergence based on energy
+
+# Adjust grid size for ailising copies
                 
                  
 # Plot results
