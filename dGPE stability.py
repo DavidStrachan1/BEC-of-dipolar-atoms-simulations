@@ -46,13 +46,7 @@ D=m*n*Cdd/(4*cn.pi*(cn.hbar)**2*xs) # Dimensionless dipolar interaction paramete
 D=400
 gs=0
 
-# Grid spacing = 10
-dipoles=np.linspace(0,2000,10)
-#contacts=np.linspace(0,3000,10)
-gammas=np.linspace(1,20,10)
-
-stable_matrix=np.zeros([10,10]) # Stability matrix
-Edd=np.array([]) # Relative dipole strength array
+### Below is code for finding the ground state
 
 #rv,zv=np.meshgrid(r,z) # Make a 2D grid of r and z 
 rv=r.reshape(1,-1).repeat(N,0).T
@@ -98,18 +92,6 @@ def Vdd_cyl(psi): # Dipole interaction energy with cylindrical cut-off
     Uddf*=D
     return ifft2(Uddf*fft2(psi**2)) # Convolution theorem
 
-def dd_cont_cyl(psi_zr):
-    lamda=D
-    theta_k =np.arccos(kz/kmag) ##polarized in z direction
-    Zc=np.max(z)+1
-    out = np.nan_to_num(lamda*(3*np.cos(theta_k)**2 - 1)/3)
-    out += lamda*np.exp(-Zc*2*np.pi*rho)*((np.sin(theta_k)**2)*np.cos(Zc*kz)
-                            -np.sin(theta_k)*np.cos(theta_k)*np.sin(Zc*kz))
-    out = np.nan_to_num(out)
-    
-    out -= lamda*cyl_cutoff.U
-    out = ifft2(out*fft2(np.abs(psi_zr)**2))
-    return out
 
 # Pancake potential (Circular potential in r)
 #def expVrhpsi):
@@ -128,17 +110,27 @@ psi=psir.reshape(1,-1).repeat(N,0).T # Creates 2d psi from 1d
 #psi=psir.reshape(-1,1).repeat(Nz,1) # Creates 2d psi from 1d
 J=J.reshape(-1,1)
 
+### Stability code
+
+dipoles=np.linspace(0,2000,10)
+#contacts=np.linspace(0,3000,10)
+gammas=np.linspace(1,20,10)
+
+stable_matrix=np.zeros([10,10]) # Stability matrix
+Edd=np.array([]) # Relative dipole strength array
+
 for i in range(len(gammas)):
         for j in range(len(dipoles)):
             
             gamma=gammas[i]
             D=dipoles[j]
             
-            #dt=dt/gamma
+            #dt=dt/gamma # change dt each time for efficiency
             
             isConv=False
             p=1
             
+            # Create a matrix of historical values of psi (to compare each iteration)
             init_psi=np.exp(-r**2).reshape(1,-1).repeat(N,0).T
             hist_psi=[[0,init_psi[int(2*N/5):int(3*N/5)]]]
             
@@ -151,12 +143,14 @@ for i in range(len(gammas)):
                 # Add psi to the history of psi              
                 hist_psi.append([p,psi])
                 
-                val1=abs(np.mean(hist_psi[p][1]))
-                val2=abs(np.mean(hist_psi[p-1][1]))
+                val1=abs(np.mean(hist_psi[p][1])) # First value to consider
+                val2=abs(np.mean(hist_psi[p-1][1])) # Second value to consider
                 
                 diff=val2-val1
                 
-                percent_change=100*np.abs((val2-val1))/val1
+                percent_change=100*np.abs((val2-val1))/val1 # Calculate percentage change
+                
+                ### For energy, create a historical array of energies
             
                 # Checking for convergence     
                 if percent_change < 1: # Will run if the wavefunction changes by less than 1%
@@ -164,7 +158,7 @@ for i in range(len(gammas)):
                     stable_matrix[i][j]=1 # Runs if wavefunction has converged
                     
                 
-                """
+                """ ### Convergence based on if wavefunction goes to NaN
                 if math.isnan(np.mean(psi)) == True:
                     stable_matrix[i][j]=0 # Runs if wavefunction hasn't converged
                 else:
