@@ -13,6 +13,7 @@ from numpy.fft import fft,ifft,fftfreq,fft2,ifft2
 from numpy import linalg as la
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
+import seaborn as sns
 from tqdm import tqdm
 import scipy.constants as cn
 from hankel import hankel_class as hankel
@@ -188,3 +189,6 @@ plt.xlabel("gamma")
 plt.ylabel("Dipole strength")
 ax.set_title("Convergence plot")
 plt.show()
+
+# Plot heatmap
+sns.heatmap(stable_matrix)
