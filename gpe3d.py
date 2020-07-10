@@ -50,25 +50,20 @@ bohr_mag=cn.e*cn.hbar/(2*cn.m_e) # Bohr magneton
 Cdd=cn.mu_0*(6.98*bohr_mag)**2 # Dipole-dipole interaction coefficient
 D=m*n*Cdd/(4*cn.pi*(cn.hbar)**2*xs) # Dimensionless dipolar interaction parameter
 
-D=3000
+D=2000
 gs=0
 
-# Potential energy operator
-def V(psi):
-    return 0.5*(x**2+y**2+(gamma*z)**2) + gs*np.abs(psi)**2 + Vdd_cyl(psi)
-
 # Returns dimensionless energy of wavefunction
-def E(psi):
-    integrand=0.5*np.abs(np.gradient(psi))**2 + V(psi)*np.abs(psi)**2 \
-        + (gs/2)*np.abs(psi)**4 + (D/2)*Vdd(psi)*np.abs(psi)**2
-            
-    integral =  dx**3*np.sum(integrand)
-    
-    return integral
+def E(psi):  
+    V_ext=0.5*(x**2+y**2+(gamma*z)**2) # External potential
+    integrand=0.5*np.abs(np.gradient(psi))**2 + V_ext*np.abs(psi)**2 \
+        + (gs/2)*np.abs(psi)**4 + (D/2)*Vdd_cyl(psi)*np.abs(psi)**2           
+    energy = dx**3*np.sum(integrand)  # Doing the integral
+    return energy.real
 
             
 def Vdd(psi): # Dipole interaction energy
-    Rc=5 # Spherical cut off should be greater than system size
+    Rc=4 # Spherical cut off should be greater than cloud size
     Uddf=D/3
     Uddf+=D*np.cos(Rc*kmag)/(Rc*kmag)**2
     Uddf=np.nan_to_num(Uddf)
@@ -92,8 +87,8 @@ def Vdd_cyl(psi): # Dipole interaction energy with cylindrical cut-off
     return ifftn(Uddf*fftn(np.abs(psi)**2)) # Convolution theorem
 
 def expVh(psi): # Harmonic potential
-    #V=0.5*(x**2+y**2+(gamma*z)**2) + gs*np.abs(psi)**2 + Vdd(psi)
-    return np.exp(-0.5j*V(psi)*dt)
+    V=0.5*(x**2+y**2+(gamma*z)**2) + gs*np.abs(psi)**2 + Vdd_cyl(psi)
+    return np.exp(-0.5j*V*dt)
 
 #def expVh(psi): # Box potential
  #   V=((1/4.75)*x)**1000+((1/4.75)*y)**1000+((1/4.75)*z)**1000+gs*np.abs(psi)**2 + Vdd(psi)
@@ -115,33 +110,45 @@ T=0.5*(kx**2+ky**2+kz**2) # Defining kinetic energy operator T
 expT=np.exp(-1j*T*dt)
 
 # Guess initial psi as gaussian
-psi=0.5*np.exp(-(x**2+y**2+z**2))
+psi=np.exp(-(x**2+y**2+(gamma*z)**2))
 #psi=np.cos(cn.pi*x/20)*np.cos(cn.pi*y/20)*np.cos(cn.pi*z/20)
+psi/=la.norm(psi)
 
-dt_array=np.linspace(-0.1j,0.1j/gamma,500)
+dt_array=np.linspace(-0.05j,0.005j,100)
 
-for i in tqdm(range(500)): # Loop until limit reached
+energies=[]
+hist_psi=[]
+index=range(50)
+
+for i in tqdm(range(50),leave=False): # Loop until limit reached
+    if i%5 == 0: # Runs every 5 iterations
+        energies.append(E(psi))
+        hist_psi.append(np.mean(psi))
+        
     #dt=dt_array[i]
     psi=expVh(psi)*ifftn(expT*fftn(expVh(psi)*psi)) # Split step Fourier method  
     psi/=la.norm(psi) 
-       
-actual=np.exp(-0.5*(x**2+y**2+z**2))
+    
+energies=np.array(energies).repeat(5)
+hist_psi=np.array(hist_psi).repeat(5)
+          
+actual=np.exp(-0.5*(x**2+y**2+(gamma*z)**2))
 #actual=np.cos(cn.pi*x/10)*np.cos(cn.pi*y/10)*np.cos(cn.pi*z/10)
 actual/=la.norm(actual)
-grpsidiff=psi.real-actual    
+psidiff=psi.real-actual    
     
 zval=0 # Z value on axis    
 # Plotting results
 def graph(psi,zval):
 
     zindex=int(N/2 + zval/dx) # Converts the z value into an index for the z array
-    fig=plt.figure()
+    #fig=plt.figure()
     ax=plt.axes(projection="3d")
     ax.plot_surface(x[:,:,zindex],y[:,:,zindex],psi[:,:,zindex].real,cmap="jet")
     
     plt.xlabel("x")
     plt.ylabel("y")
-    ax.set_title("Ground state wavefunction for z="+str(zval))
+    ax.set_title("Ground state wavefunction for z="+str(zval)+" and D="+str(D))
     plt.show()
     
 graph(psi,zval)   
