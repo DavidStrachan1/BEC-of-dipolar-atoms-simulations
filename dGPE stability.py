@@ -68,6 +68,15 @@ expTr=expTr.reshape(-1,1)
 Tz=0.5*kz**2
 expTz=np.exp(-1j*Tz*dt)
 
+# Returns dimensionless energy of wavefunction
+def E(psi):  
+    V_ext=0.5*(rv**2+(gamma*zv)**2) # External potential
+    integrand=0.5*np.abs(np.gradient(psi))**2 + V_ext*np.abs(psi)**2 \
+        + (gs/2)*np.abs(psi)**4 + (D/2)*Vdd_cyl(psi)*np.abs(psi)**2   
+    dr=np.max(r)/len(r)        
+    energy =  2*cn.pi*dr*dz*np.sum(integrand)  # Doing the integral
+    return energy.real
+
 def Vdd(psi): # Dipole interaction energy
     Rc=25 # Spherical cut-off should be greater than system size
     # Calculating FT of dipole potential
@@ -117,7 +126,6 @@ dipoles=np.linspace(0,2000,10)
 gammas=np.linspace(1,20,10)
 
 stable_matrix=np.zeros([10,10]) # Stability matrix
-Edd=np.array([]) # Relative dipole strength array
 
 for i in range(len(gammas)):
         for j in range(len(dipoles)):
@@ -127,54 +135,47 @@ for i in range(len(gammas)):
             
             #dt=dt/gamma # change dt each time for efficiency
             
+            # Create a matrix of historical values of psi (to compare each iteration)
+            init_psi=np.exp(-r**2)
+            init_psi=init_psi/la.norm(init_psi).reshape(1,-1).repeat(N,0).T
+            energies=[E(init_psi)]
+            
             isConv=False
             p=1
-            
-            # Create a matrix of historical values of psi (to compare each iteration)
-            init_psi=np.exp(-r**2).reshape(1,-1).repeat(N,0).T
-            hist_psi=[[0,init_psi[int(2*N/5):int(3*N/5)]]]
             
             while isConv==False and p<1500: # Loop until convergence or limit reached
                 psi=ifft(expTz*fft(expVh(psi)*psi,axis=1),axis=1) # Split step Fourier/Hankel method
                 psi=expVh(psi)*hankel.invhankel(expTr*hankel.hankel(psi,J),J)
                 psi/=la.norm(psi)
                 
+                if p%10 == 0: # Will run every 10 iterations
+                    
+                    # Add energy to list of eneries
+                    energies.append(E(psi))
+                    
+                    m=int(p/10) # Energy index
+                    val1=energies[m-1]# First value to consider
+                    val2=energies[m] # Second value to consider
+                    
+                    diff=val2-val1
+                    
+                    percent_change=100*np.abs((val2-val1))/val1 # Calculate percentage change
                 
-                # Add psi to the history of psi              
-                hist_psi.append([p,psi])
-                
-                val1=abs(np.mean(hist_psi[p][1])) # First value to consider
-                val2=abs(np.mean(hist_psi[p-1][1])) # Second value to consider
-                
-                diff=val2-val1
-                
-                percent_change=100*np.abs((val2-val1))/val1 # Calculate percentage change
-                
-                ### For energy, create a historical array of energies
-            
-                # Checking for convergence     
-                if percent_change < 1: # Will run if the wavefunction changes by less than 1%
-                    isConv=True
-                    stable_matrix[i][j]=1 # Runs if wavefunction has converged
+                    # Checking for convergence     
+                    if percent_change < 1: # Will run if the energy changes by less than 1%
+                        isConv=True
+                        stable_matrix[i][j]=1 # Runs if wavefunction has converged
                     
                 
-                """ ### Convergence based on if wavefunction goes to NaN
+                """ # Convergence based on if wavefunction goes to NaN
                 if math.isnan(np.mean(psi)) == True:
                     stable_matrix[i][j]=0 # Runs if wavefunction hasn't converged
                 else:
                     stable_matrix[i][j]=1 # Runs if wavefunction has converged
                 """    
-                p+=1
+                p+=1 # Increases iteration number by 1 each loop
                 
-# TODO                
-                
-# New wavefunction is old wavefunction (better ansatz)
 
-# Convergence based on energy
-
-# Adjust grid size for ailising copies
-                
-                 
 # Plot results
 gammav=gammas.reshape(-1,1).repeat(10,1)
 dipolesv=dipoles.reshape(1,-1).repeat(len(dipoles),0)
