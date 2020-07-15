@@ -1,0 +1,363 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.6) (preloaded format=pdflatex 2020.6.30)  15 JUL 2020 21:33
+entering extended mode
+**"C:/Users/david/OneDrive/Documents/UNI/BEC project/latex report/dBEC report.t
+ex"
+
+("C:/Users/david/OneDrive/Documents/UNI/BEC project/latex report/dBEC report.te
+x"
+LaTeX2e <2020-02-02> patch level 5
+L3 programming layer <2020-06-18>
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
+Document Class: article 2019/12/20 v1.4l Standard LaTeX document class
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/base\size10.clo
+File: size10.clo 2019/12/20 v1.4l Standard LaTeX file (size option)
+)
+\c@part=\count167
+\c@section=\count168
+\c@subsection=\count169
+\c@subsubsection=\count170
+\c@paragraph=\count171
+\c@subparagraph=\count172
+\c@figure=\count173
+\c@table=\count174
+\abovecaptionskip=\skip47
+\belowcaptionskip=\skip48
+\bibindent=\dimen134
+)
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+Package: graphicx 2019/11/30 v1.2a Enhanced LaTeX Graphics (DPC,SPQR)
+
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks15
+)
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+Package: graphics 2019/11/30 v1.4a Standard LaTeX Graphics (DPC,SPQR)
+
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.c
+fg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 105.
+
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+File: pdftex.def 2018/01/08 v1.0l Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen135
+\Gin@req@width=\dimen136
+) (C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/float\float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count175
+\float@exts=\toks16
+\float@box=\box45
+\@float@everytoks=\toks17
+\@floatcapt=\box46
+)
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+Package: amsmath 2020/01/20 v2.17e AMS math features
+\@mathmargin=\skip49
+
+For additional information on amsmath, use the `?' option.
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+Package: amstext 2000/06/29 v2.01 AMS text
+
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks18
+\ex@=\dimen137
+))
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen138
+)
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty
+Package: amsopn 2016/03/08 v2.02 operator names
+)
+\inf@bad=\count176
+LaTeX Info: Redefining \frac on input line 227.
+\uproot@=\count177
+\leftroot@=\count178
+LaTeX Info: Redefining \overline on input line 389.
+\classnum@=\count179
+\DOTSCASE@=\count180
+LaTeX Info: Redefining \ldots on input line 486.
+LaTeX Info: Redefining \dots on input line 489.
+LaTeX Info: Redefining \cdots on input line 610.
+\Mathstrutbox@=\box47
+\strutbox@=\box48
+\big@size=\dimen139
+LaTeX Font Info:    Redeclaring font encoding OML on input line 733.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 734.
+\macc@depth=\count181
+\c@MaxMatrixCols=\count182
+\dotsspace@=\muskip16
+\c@parentequation=\count183
+\dspbrk@lvl=\count184
+\tag@help=\toks19
+\row@=\count185
+\column@=\count186
+\maxfields@=\count187
+\andhelp@=\toks20
+\eqnshift@=\dimen140
+\alignsep@=\dimen141
+\tagshift@=\dimen142
+\tagwidth@=\dimen143
+\totwidth@=\dimen144
+\lineht@=\dimen145
+\@envbody=\toks21
+\multlinegap=\skip50
+\multlinetaggap=\skip51
+\mathdisplay@stack=\toks22
+LaTeX Info: Redefining \[ on input line 2859.
+LaTeX Info: Redefining \] on input line 2860.
+)
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+)) (C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/tools\multicol.sty
+Package: multicol 2019/12/09 v1.8y multicolumn formatting (FMi)
+\c@tracingmulticols=\count188
+\mult@box=\box49
+\multicol@leftmargin=\dimen146
+\c@unbalance=\count189
+\c@collectmore=\count190
+\doublecol@number=\count191
+\multicoltolerance=\count192
+\multicolpretolerance=\count193
+\full@width=\dimen147
+\page@free=\dimen148
+\premulticols=\dimen149
+\postmulticols=\dimen150
+\multicolsep=\skip52
+\multicolbaselineskip=\skip53
+\partial@page=\box50
+\last@line=\box51
+\maxbalancingoverflow=\dimen151
+\mult@rightbox=\box52
+\mult@grightbox=\box53
+\mult@gfirstbox=\box54
+\mult@firstbox=\box55
+\@tempa=\box56
+\@tempa=\box57
+\@tempa=\box58
+\@tempa=\box59
+\@tempa=\box60
+\@tempa=\box61
+\@tempa=\box62
+\@tempa=\box63
+\@tempa=\box64
+\@tempa=\box65
+\@tempa=\box66
+\@tempa=\box67
+\@tempa=\box68
+\@tempa=\box69
+\@tempa=\box70
+\@tempa=\box71
+\@tempa=\box72
+\@tempa=\box73
+\@tempa=\box74
+\@tempa=\box75
+\@tempa=\box76
+\@tempa=\box77
+\@tempa=\box78
+\@tempa=\box79
+\@tempa=\box80
+\@tempa=\box81
+\@tempa=\box82
+\@tempa=\box83
+\@tempa=\box84
+\@tempa=\box85
+\@tempa=\box86
+\@tempa=\box87
+\@tempa=\box88
+\@tempa=\box89
+\@tempa=\box90
+\@tempa=\box91
+\@tempa=\box92
+\c@minrows=\count194
+\c@columnbadness=\count195
+\c@finalcolumnbadness=\count196
+\last@try=\dimen152
+\multicolovershoot=\dimen153
+\multicolundershoot=\dimen154
+\mult@nat@firstbox=\box93
+\colbreak@box=\box94
+\mc@col@check@num=\count197
+)
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
+mode.def
+File: l3backend-pdfmode.def 2020-06-23 L3 backend support: PDF mode
+\l__kernel_color_stack_int=\count198
+\l__pdf_internal_box=\box95
+)
+No file "dBEC report".aux.
+\openout1 = `"dBEC report.aux"'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
+ii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count199
+\scratchdimen=\dimen155
+\scratchbox=\box96
+\nofMPsegments=\count266
+\nofMParguments=\count267
+\everyMPshowfont=\toks23
+\MPscratchCnt=\count268
+\MPscratchDim=\dimen156
+\MPnumerator=\count269
+\makeMPintoPDFobject=\count270
+\everyMPtoPDFconversion=\toks24
+)
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
+ase.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+85.
+)
+LaTeX Font Info:    Trying to load font information for U+msa on input line 22.
+
+
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 22.
+
+
+(C:\Users\david\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+No file "dBEC report".toc.
+\tf@toc=\write3
+\openout3 = `"dBEC report.toc"'.
+
+[1
+
+{C:/Users/david/AppData/Local/MiKTeX/pdftex/config/pdftex.map}]
+Overfull \hbox (16.50829pt too wide) detected at line 36
+ []$[]  \OML/cmm/m/it/10 i\U/msb/m/n/10 ~[] \OT1/cmr/m/n/10 = [] \OMS/cmsy/m/n/
+10   []r[] \OT1/cmr/m/n/10 + \OML/cmm/m/it/10 V[]\OT1/cmr/m/n/10 ([]) + []\OMS/
+cmsy/m/n/10 j\OML/cmm/m/it/10  \OT1/cmr/m/n/10 ([][]\OML/cmm/m/it/10 ; t\OT1/cm
+r/m/n/10 )\OMS/cmsy/m/n/10 j[]$ 
+ []
+
+
+Overfull \hbox (2.32553pt too wide) detected at line 50
+ []$[]  \OML/cmm/m/it/10 i[] \OT1/cmr/m/n/10 = [] \OMS/cmsy/m/n/10   []r[] \OT1
+/cmr/m/n/10 + [](\OML/cmm/m/it/10 x[] \OT1/cmr/m/n/10 + \OML/cmm/m/it/10 y[] \O
+T1/cmr/m/n/10 + \OML/cmm/m/it/10 z[]\OT1/cmr/m/n/10 ) + \OML/cmm/m/it/10 g[]\O
+MS/cmsy/m/n/10 j\OML/cmm/m/it/10  \OT1/cmr/m/n/10 ([]\OML/cmm/m/it/10 ; t\OT1/c
+mr/m/n/10 )\OMS/cmsy/m/n/10 j[]$ 
+ []
+
+
+Overfull \hbox (14.33473pt too wide) detected at line 78
+[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 k\OT1/cmr/m/n/10 ) = [][1 + 3[] \OMS/cmsy/m
+/n/10   \OT1/cmr/m/n/10 3[]](3 [] [][] \OMS/cmsy/m/n/10   \OT1/cmr/m/n/10 1)
+ []
+
+[2]
+
+LaTeX Warning: Citation `Kai_Ming_2009' on page 3 undefined on input line 95.
+
+
+LaTeX Warning: Citation `Kai_Ming_2009' on page 3 undefined on input line 130.
+
+[3]
+Overfull \hbox (2.49902pt too wide) detected at line 169
+ []$[]  []\OT1/cmr/m/n/10 ([][]\OML/cmm/m/it/10 ; t\OT1/cmr/m/n/10 ) = [] \OML/
+cmm/m/it/10 d[][]e[]\OMS/cmsy/m/n/10 j\OML/cmm/m/it/10  []\OT1/cmr/m/n/10 ([][]
+\OML/cmm/m/it/10 ; t\OT1/cmr/m/n/10 )\OMS/cmsy/m/n/10 j[]\OML/cmm/m/it/10 ;$ []
+  
+ []
+
+<Images/gndstateQuasi2DHankel.png, id=26, 390.45876pt x 262.9825pt>
+File: Images/gndstateQuasi2DHankel.png Graphic file (type png)
+<use Images/gndstateQuasi2DHankel.png>
+Package pdftex.def Info: Images/gndstateQuasi2DHankel.png  used on input line 1
+82.
+(pdftex.def)             Requested size: 132.90727pt x 89.51317pt.
+<Images/gndstate1.png, id=28, 292.09125pt x 192.11775pt>
+File: Images/gndstate1.png Graphic file (type png)
+<use Images/gndstate1.png>
+Package pdftex.def Info: Images/gndstate1.png  used on input line 192.
+(pdftex.def)             Requested size: 132.90727pt x 87.41957pt.
+<Images/gndstate3DHankel.png, id=29, 350.30875pt x 231.86626pt>
+File: Images/gndstate3DHankel.png Graphic file (type png)
+<use Images/gndstate3DHankel.png>
+Package pdftex.def Info: Images/gndstate3DHankel.png  used on input line 204.
+(pdftex.def)             Requested size: 132.90727pt x 87.9721pt.
+[4 <C:/Users/david/OneDrive/Documents/UNI/BEC project/latex report/Images/gndst
+ateQuasi2DHankel.png> <C:/Users/david/OneDrive/Documents/UNI/BEC project/latex 
+report/Images/gndstate1.png> <C:/Users/david/OneDrive/Documents/UNI/BEC project
+/latex report/Images/gndstate3DHankel.png>]
+<Images/ContactThomasFermiQuasi 2DHankelgamma=50No=4e5.png, id=38, 390.45876pt 
+x 262.9825pt>
+File: Images/ContactThomasFermiQuasi 2DHankelgamma=50No=4e5.png Graphic file (t
+ype png)
+<use Images/ContactThomasFermiQuasi 2DHankelgamma=50No=4e5.png>
+Package pdftex.def Info: Images/ContactThomasFermiQuasi 2DHankelgamma=50No=4e5.
+png  used on input line 233.
+(pdftex.def)             Requested size: 132.90727pt x 89.51317pt.
+<Images/Contact Thomas Fermi 3D Hankel gamma=5 No=2e5.png, id=39, 383.4325pt x 
+279.0425pt>
+File: Images/Contact Thomas Fermi 3D Hankel gamma=5 No=2e5.png Graphic file (ty
+pe png)
+<use Images/Contact Thomas Fermi 3D Hankel gamma=5 No=2e5.png>
+Package pdftex.def Info: Images/Contact Thomas Fermi 3D Hankel gamma=5 No=2e5.p
+ng  used on input line 241.
+(pdftex.def)             Requested size: 132.90727pt x 96.72534pt.
+<Images/Dipolar Thomas Fermi 3D Hankel gamma = 80 No=2e4.png, id=40, 383.4325pt
+ x 279.0425pt>
+File: Images/Dipolar Thomas Fermi 3D Hankel gamma = 80 No=2e4.png Graphic file 
+(type png)
+<use Images/Dipolar Thomas Fermi 3D Hankel gamma = 80 No=2e4.png>
+Package pdftex.def Info: Images/Dipolar Thomas Fermi 3D Hankel gamma = 80 No=2e
+4.png  used on input line 251.
+(pdftex.def)             Requested size: 132.90727pt x 96.72534pt.
+<Images/Dipolar Thomas Fermi Quasi 2D Hankel gamma = 80 No = 2e4.png, id=41, 39
+0.45876pt x 262.9825pt>
+File: Images/Dipolar Thomas Fermi Quasi 2D Hankel gamma = 80 No = 2e4.png Graph
+ic file (type png)
+<use Images/Dipolar Thomas Fermi Quasi 2D Hankel gamma = 80 No = 2e4.png>
+Package pdftex.def Info: Images/Dipolar Thomas Fermi Quasi 2D Hankel gamma = 80
+ No = 2e4.png  used on input line 257.
+(pdftex.def)             Requested size: 132.90727pt x 89.51317pt.
+
+
+LaTeX Warning: File `stability plot dt =-0.005j' not found on input line 270.
+
+
+! LaTeX Error: Unknown graphics extension: .005j.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.270 ....6\linewidth]{stability plot dt =-0.005j}
+                                                  
+? 
