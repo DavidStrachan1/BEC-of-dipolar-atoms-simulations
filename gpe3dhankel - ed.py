@@ -15,13 +15,12 @@ import seaborn as sns
 from tqdm import tqdm
 import scipy.constants as cn
 from hankel import hankel_class
-from cylindercutoff import cyl_cutoff
 import pandas as pd
 import warnings
 warnings.simplefilter('ignore')
 
 # Create grid of size NxN up to max_r in r space and -max_r/2 to max_r/2 in z space
-def create_grid(N,max_r,max_z,hankel,hankel_space=False):
+def create_grid(N,max_r,max_z,gamma,hankel,hankel_space=False):
     if hankel_space:
         x=hankel.r().reshape(-1,1).repeat(N+1,1) # Makes r space
         y=hankel.rho().reshape(-1,1).repeat(N+1,1) # Makes rho space
@@ -34,29 +33,10 @@ def create_grid(N,max_r,max_z,hankel,hankel_space=False):
 # Harmonic potential function (dimensionless)
 def V_harmonic(r,z,gamma_r,gamma_z):
     return 0.5*((gamma_r*r)**2+(gamma_z*z)**2)
-"""
-#function used in U_Cyl
-def f_cyl(rho,z,k_rho,k_z):
-    return rho*np.cos(k_z*z)*(rho**2-2*z**2)*(rho**2+z**2)**(-5/2)*sp.j0(2*cn.pi*k_rho*rho)
 
-#Cylindrical cut-off integral term
-def U_Cyl(kx,ky,kz,R_c,Z_c):
-    
-    k_rho=np.sqrt(kx**2+ky**2)
-    Nx,Ny,Nz=kx.shape[0:3]
-    U=np.zeros((Nx,Ny,Nz))
-    
-    Nri=101
-    Nzi=101
-    
-    dr=np.minimum(0.01*2*cn.pi/k_rho,30/Nri)
-    dz=Z_c/(Nzi-1)
-      
-    for i in tqdm(range(Nri),leave=False):
-        for j in range(Nzi):
-            U+=dr*dz*f_cyl(R_c+i*dr,j*dz,k_rho,kz)    
-    return U
-"""
+def V_box(r,z,Rc,gamma_z):
+    return (r/(Rc-0.2))**60 + 0.5*(gamma_z*z)**2
+
 # Dipole potential contribution for a given Uddf (FT of dipole term)
 def Vdd(psi,Uddf,hankel,J):
     out = Uddf*hankel.hankel(fft(np.abs(psi)**2,axis=1),J)
@@ -69,7 +49,9 @@ def E(psi,N,max_r,max_z,V_trap,Uddf,gs,Na,kmag,hankel,J):
     integrand= 0.5*np.abs(ifft(hankel.invhankel(-1j*kmag*fft(hankel.hankel(psi,J),axis=1),J),axis=1))**2\
         + V_trap*np.abs(psi)**2 \
         + (gs/2)*np.abs(psi)**4 + (1/2)*Vdd(psi,Uddf,hankel,J)*np.abs(psi)**2           
-    energy = 2*np.pi*dr*dz*np.sum(integrand)  # Doing the integral
+    #energy = 2*np.pi*dr*dz*np.sum(integrand)  # Doing the integral
+    energy=2*np.pi*np.sum(integrand[1,:])*dz*r[1,0]*r[1,0]/2 # First r term has slightly different dr
+    energy+=2*np.pi*np.sum(r[2:,:]*integrand[2:,:])*dr*dz
     return energy.real
 
 # Exp of potential energy operator
@@ -85,10 +67,20 @@ def norm(psi,r,z,N,max_z): # Normalisation function
     return out
 
 # Plotting results
-def graph2D(func,r,z,gamma,D):
+def graph2D(func,r,z,N,gamma,D):
     fig=plt.figure()
     ax=plt.axes(projection="3d")
-    ax.plot_surface(r,z,func.real,cmap="jet")
+    #ax.plot_surface(r,z,func.real,cmap="jet")
+    
+    midway_index_z = int(N/2)
+    z_cutoff = z.max()
+    r_cutoff = 10
+    bools =(np.abs(r) <= r_cutoff)*(np.abs(z) <=z_cutoff)
+    n_1 = np.sum(bools[:,midway_index_z]) # number of r coords with value less than r_cutoff
+    n_2 = np.sum(bools[0,:]) # number of z coords with value less than z_cutoff
+    z_coord_i = int(midway_index_z-n_2/2)
+    z_coord_f = int(midway_index_z+n_2/2)
+    ax.plot_surface(r[0:n_1,z_coord_i:z_coord_f],z[0:n_1,z_coord_i:z_coord_f],np.abs(psi)[0:n_1,z_coord_i:z_coord_f],cmap='jet')
     
     plt.xlabel("r")
     plt.ylabel("z")
@@ -105,7 +97,7 @@ Cdd=cn.mu_0*(6.98*bohr_mag)**2 # Dipole-dipole interaction coefficient of erbium
 a=a0*100 # s-wave scattering length
 Na=1e5 # Number of atoms
 w=20*cn.pi # Radial angular velocity
-gamma=7 # wz/w trap aspect ratio
+gamma=9 # wz/w trap aspect ratio
 
 #Dimensionless unit formulas
 xs=np.sqrt(cn.hbar/(m*w)) # Length scaling parameter
@@ -113,29 +105,30 @@ gs=4*cn.pi*a*Na/xs # Dimensionless contact coefficient
 D=m*Na*Cdd/(4*cn.pi*(cn.hbar)**2*xs) # Dimensionless dipolar interaction parameter
 
 #Override of parameters:
-D=30
+D=40
 gs=0
 
 #Numerical simulation parameters
 N=300
-max_r=20
-max_z=10
+max_r=6
+max_z_init=10
 dt=-0.01j # Imaginary time propagation unit
 Nit=500 # Number of iterations
-Rc=5 # r cutoff
-Zc=6 # z cutoff
+Rc=10 # radius of sphere cutoff (Not needed in r direction)
+#Zc=6 # z cutoff
 
-# big dt causing nan? better initial guess
+max_z=max_z_init*gamma**(-0.5) # Changes max_z as a function of gamma (for high accuracy)
+Zc=max_z/2
+
+# check real time propagation
 
 ## TODO
-# max_z/rootgamma
-# b=max_z/2
 # xs as a function of wz for box plot
 
 # Define grids
-hankel=hankel_class(N,max_r)
-r,rho = create_grid(N,max_r,max_z,hankel,True)
-z,kz = create_grid(N,max_r,max_z,hankel,False)
+hankel=hankel_class(N,max_r) # Create instance of hankel transform with set parameters
+r,rho = create_grid(N,max_r,max_z,gamma,hankel,True)
+z,kz = create_grid(N,max_r,max_z,gamma,hankel,False)
 
 k_rho=2*np.pi*rho # rho is wavevector in hankel space
 J=hankel.J.reshape(-1,1) # Used in hankel transform
@@ -145,27 +138,33 @@ kmag=(k_rho**2+kz**2)**0.5
 
 # Harmonic potential
 V=V_harmonic(r,z,1,gamma)
+#V=V_box(r,z,max_r,gamma)
 
-# Kinetic energy operator
+# Kinetic energy operator and the exponential form
 T=0.5*kmag**2
 expT=np.exp(-1j*T*dt)
 
 # Uddf calculation
 DD=D*4*np.pi/3
-Uddf=3*np.nan_to_num(kz/kmag,posinf=0)**2-1
-
-if gamma<5: # Use spherical cutoff
-    Uddf*=1+3*np.nan_to_num(np.cos(Rc*kmag)/(Rc*kmag)**2,posinf=0) \
-        -3*np.nan_to_num(np.sin(Rc*kmag)/(Rc*kmag)**3,posinf=0)
-else:
-    Uddf+=np.exp(-Zc*k_rho)*(np.nan_to_num(k_rho/kmag,posinf=0)**2*np.cos(Zc*kz) \
-                             -np.nan_to_num(k_rho/kmag,posinf=0)*np.nan_to_num(kz/kmag,posinf=0)\
-                                 *np.sin(Zc*kz))
+# Use spherical cutoff
+Uddf1=(3*np.nan_to_num(kz/kmag,posinf=0)**2-1)\
+    *(1+3*np.nan_to_num(np.cos(Rc*kmag)/(Rc*kmag)**2,posinf=0)\
+    -3*np.nan_to_num(np.sin(Rc*kmag)/(Rc*kmag)**3,posinf=0))
+# Use cylindrical cutoff
+Uddf2=(3*np.nan_to_num(kz/kmag,posinf=0)**2-1)+3*np.exp(-Zc*k_rho)*(np.nan_to_num(k_rho/kmag,posinf=0)**2*np.cos(Zc*kz) \
+    -np.nan_to_num(k_rho/kmag,posinf=0)*np.nan_to_num(kz/kmag,posinf=0)*np.sin(Zc*kz))
     #Uddf-=U # R cutoff integral (if=0 then just z cutoff)
+
+if gamma<4:
+    Uddf=Uddf1 # Use spherical cut-off for low gamma
+else:
+    Uddf=Uddf2 # Use cylindrical cut-off for high gamma
+    
 Uddf*=DD
 
 # Guess initial psir as gaussian
-psi=np.exp(-r**2/5-gamma*z**2)
+#psi=np.exp(-(r**2/5+gamma*z**2))
+psi=np.exp(-r**2/50-gamma*z**2/50)
 psi/=norm(psi,r,z,N,max_z)
 
 # Imaginary time propagation
@@ -183,7 +182,9 @@ for i in tqdm(index,leave=False): # Loop until limit reached
     psi/=norm(psi,r,z,N,max_z)
     
     # if i%5==0: # Runs every 5 iterations
+    # Add energy of psi to an existing list
     energies.append(E(psi,N,max_r,max_z,V,Uddf,gs,Na,kmag,hankel,J))
+    # Add sum of wavefunction to an existing list
     hist_psi.append(np.sum(psi))
     
 energies=np.array(energies)
@@ -200,12 +201,17 @@ tf=np.nan_to_num(np.sqrt((mu/(cn.hbar*w)-V)/gs))
 tf/=norm(tf,r,z,N,max_z)
 tf_diff=tf-psi
 
+## Actual psi
+actual=np.exp(-0.5*(r**2+gamma*z**2))
+actual/=norm(actual,r,z,N,max_z)
+psidiff=psi.real-actual
+
 # Plotting results
-graph2D(psi,r,z,gamma,D)
+graph2D(psi,r,z,N,gamma,D)
 
 # Linear plots
 plt.plot(r[:,0],psi[:,int(N/2)]);
-#plt.plot(z,psi[0,:])
+#plt.plot(z[0,:],psi[0,:]);
 
 # Plot heatmap
 #sns.heatmap(psi.real)
