@@ -1,0 +1,12 @@
+\contentsline {section}{\numberline {1}The Gross-Pitaevskii equation (GPE) for dipolar condensates in three dimensions}{2}%
+\contentsline {section}{\numberline {2}Evaluation of dipole interaction}{2}%
+\contentsline {section}{\numberline {3}Hankel Transform using the Dini expansion}{3}%
+\contentsline {section}{\numberline {4}Convergence using imaginary time propagation and the split step Fourier/Hankel method}{3}%
+\contentsline {section}{\numberline {5}Quasi 2D approach}{4}%
+\contentsline {section}{\numberline {6}Accuracy with no interactions}{4}%
+\contentsline {section}{\numberline {7}Thomas Fermi}{5}%
+\contentsline {section}{\numberline {8}Contact interactions}{5}%
+\contentsline {section}{\numberline {9}Purely dipolar interactions}{5}%
+\contentsline {section}{\numberline {10}Discussion of stability of a purely dipolar gas}{6}%
+\contentsline {subsection}{\numberline {10.1}In a harmonic trap}{6}%
+\contentsline {subsection}{\numberline {10.2}In a pancake trap}{6}%
