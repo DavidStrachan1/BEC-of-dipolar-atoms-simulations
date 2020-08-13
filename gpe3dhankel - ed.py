@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jul 16 16:19:30 2020
-
 Modelling a dipolar Bose-Einstein condensate by finding the ground state solution 
 of the Gross–Pitaevskii equation using imaginary time propagation
 and the split step Hankel method in 3D with cylindrical symmetry
@@ -14,6 +13,7 @@ from mpl_toolkits import mplot3d
 import seaborn as sns
 from tqdm import tqdm
 import scipy.constants as cn
+import scipy.special as sp
 from hankel import hankel_class
 import pandas as pd
 import warnings
@@ -34,8 +34,8 @@ def create_grid(N,max_r,max_z,gamma,hankel,hankel_space=False):
 def V_harmonic(r,z,gamma_r,gamma_z):
     return 0.5*((gamma_r*r)**2+(gamma_z*z)**2)
 
-def V_box(r,z,Rc,gamma_z):
-    return (r/(Rc-0.2))**60 + 0.5*(gamma_z*z)**2
+def V_box(r,z,box_size,gamma_z):
+    return (r/(box_size-0.2))**60 + 0.5*(gamma_z*z)**2
 
 # Dipole potential contribution for a given Uddf (FT of dipole term)
 def Vdd(psi,Uddf,hankel,J):
@@ -80,7 +80,7 @@ def graph2D(func,r,z,N,gamma,D):
     n_2 = np.sum(bools[0,:]) # number of z coords with value less than z_cutoff
     z_coord_i = int(midway_index_z-n_2/2)
     z_coord_f = int(midway_index_z+n_2/2)
-    ax.plot_surface(r[0:n_1,z_coord_i:z_coord_f],z[0:n_1,z_coord_i:z_coord_f],np.abs(psi)[0:n_1,z_coord_i:z_coord_f],cmap='jet')
+    ax.plot_surface(r[0:n_1,z_coord_i:z_coord_f],z[0:n_1,z_coord_i:z_coord_f],np.abs(func)[0:n_1,z_coord_i:z_coord_f],cmap='jet')
     
     plt.xlabel("r")
     plt.ylabel("z")
@@ -97,7 +97,7 @@ Cdd=cn.mu_0*(6.98*bohr_mag)**2 # Dipole-dipole interaction coefficient of erbium
 a=a0*100 # s-wave scattering length
 Na=1e5 # Number of atoms
 w=20*cn.pi # Radial angular velocity
-gamma=9 # wz/w trap aspect ratio
+gamma=14 # wz/w trap aspect ratio
 
 #Dimensionless unit formulas
 xs=np.sqrt(cn.hbar/(m*w)) # Length scaling parameter
@@ -105,25 +105,28 @@ gs=4*cn.pi*a*Na/xs # Dimensionless contact coefficient
 D=m*Na*Cdd/(4*cn.pi*(cn.hbar)**2*xs) # Dimensionless dipolar interaction parameter
 
 #Override of parameters:
-D=40
+D=5
 gs=0
 
 #Numerical simulation parameters
-N=300
-max_r=6
+N=100
 max_z_init=10
 dt=-0.01j # Imaginary time propagation unit
 Nit=500 # Number of iterations
-Rc=10 # radius of sphere cutoff (Not needed in r direction)
+Rc=8 # radius of r cutoff (Not needed in r direction)
 #Zc=6 # z cutoff
 
-max_z=max_z_init*gamma**(-0.5) # Changes max_z as a function of gamma (for high accuracy)
+#max_r=10 # For harmonic
+
+box_size=3 # Chosen when the gaussian in z goes to 0, so this box size produces a roughly spherical cloud
+max_r=1.2*box_size
+max_z=max_z_init*gamma**(-0.5) # Changes max_z as a function of gamma (for higher accuracy)
 Zc=max_z/2
 
-# check real time propagation
+L=2e-5/box_size
 
-## TODO
-# xs as a function of wz for box plot
+mu=2*Na*Cdd/(3*cn.hbar*cn.pi*L**2*w*xs)
+mu_d=Na*Cdd/(3*cn.hbar*cn.pi*L**2*w*xs)
 
 # Define grids
 hankel=hankel_class(N,max_r) # Create instance of hankel transform with set parameters
@@ -137,8 +140,8 @@ J=hankel.J.reshape(-1,1) # Used in hankel transform
 kmag=(k_rho**2+kz**2)**0.5 
 
 # Harmonic potential
-V=V_harmonic(r,z,1,gamma)
-#V=V_box(r,z,max_r,gamma)
+#V=V_harmonic(r,z,1,gamma)
+V=V_box(r,z,box_size,gamma)
 
 # Kinetic energy operator and the exponential form
 T=0.5*kmag**2
@@ -203,6 +206,8 @@ tf_diff=tf-psi
 
 ## Actual psi
 actual=np.exp(-0.5*(r**2+gamma*z**2))
+#actual=np.cos(r/cn.pi)*np.exp(-0.5*gamma*z**2)*(r<max_r/2).astype(int) # Not correct ground state
+actual=sp.j0(sp.jn_zeros(0,1)[0]*r/(box_size))*(r<box_size).astype(int)*np.exp(-0.5*gamma*z**2)
 actual/=norm(actual,r,z,N,max_z)
 psidiff=psi.real-actual
 
