@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jul 16 16:19:30 2020
-
 Modelling a dipolar Bose-Einstein condensate by finding the ground state solution 
 of the Gross–Pitaevskii equation using imaginary time propagation
 and the split step Hankel method in 3D with cylindrical symmetry
@@ -34,8 +33,8 @@ def create_grid(N,max_r,max_z,hankel,hankel_space=False):
 def V_harmonic(r,z,gamma_r,gamma_z):
     return 0.5*((gamma_r*r)**2+(gamma_z*z)**2)
 
-def V_box(r,z,Rc,gamma_z):
-    return (r/(Rc-0.2))**60 + 0.5*(gamma_z*z)**2
+def V_box(r,z,box_size,gamma_z):
+    return (r/(box_size-0.2))**60 + 0.5*(gamma_z*z)**2
 
 # Dipole potential contribution for a given Uddf (FT of dipole term)
 def Vdd(psi,Uddf,hankel,J):
@@ -96,42 +95,48 @@ Cdd=cn.mu_0*(6.98*bohr_mag)**2 # Dipole-dipole interaction coefficient of erbium
 #Physical parameters
 a=a0*100 # s-wave scattering length
 Na=1e5 # Number of atoms
-w=20*cn.pi # Radial angular velocity
+w=400*cn.pi # Radial angular velocity
 #gamma=7 # wz/w trap aspect ratio
 #Dimensionless unit formulas
 xs=np.sqrt(cn.hbar/(m*w)) # Length scaling parameter
 gs=4*cn.pi*a*Na/xs # Dimensionless contact coefficient
 D=m*Na*Cdd/(4*cn.pi*(cn.hbar)**2*xs) # Dimensionless dipolar interaction parameter
 
+# Pancake potential parameters
+L=1e-5
+gamma_box=(m*w*L**2)/cn.hbar
+D_box=m*Na*Cdd/(4*cn.pi*(cn.hbar)**2*L)
+
 #Override of parameters:
 #D=100
 gs=0
 
 #Numerical simulation parameters
-N=300
-max_r=10
+N=100
 max_z_init=10
 dt=-0.01j # Imaginary time propagation unit
 Nit=1000 # Number of iterations
 Rc=10 # radius of sphere cutoff (Not needed in r direction)
-Zc=6 # z cutoff
+#Zc=6 # z cutoff
+
+box_size=3
+max_r=1.2*box_size
+
+#max_r=10 # For harmonic
 
 # Define grids
 hankel=hankel_class(N,max_r) # Create instance of hankel transform with set parameters
 
 ### Stability stuff
 
-size=50
+size=80
 
-dipoles=np.linspace(0,180,size)
+dipoles=np.linspace(0,200,size)
 #contacts=np.linspace(0,3000,10)
-gammas=np.linspace(1,16,size)
+gammas=np.linspace(1,20,size)
 
-dipoles=[0,30,100,150,200,300]
+dipoles=[0]
 gammas=[1]
-
-#dipoles=[0,50]
-#gammas=[1]
 
 stable_matrix=np.zeros([size,size]) # Stability matrix (starts off assuming convergence)
 
@@ -140,7 +145,7 @@ for i in range(len(gammas)):
     gamma=gammas[i]
     
     max_z=max_z_init*gamma**(-0.5) # Changes max_z as a function of gamma (for higher accuracy)
-    Zc=max_z/2
+    Zc=max_z/2 # Z cutoff as a function of max_z
         
     r,rho = create_grid(N,max_r,max_z,hankel,True)
     z,kz = create_grid(N,max_r,max_z,hankel,False)
@@ -156,8 +161,8 @@ for i in range(len(gammas)):
     expT=np.exp(-1j*T*dt)
         
     # Harmonic potential
-    V=V_harmonic(r,z,1,gamma)
-    #V=V_box(r,z,max_r,gamma)
+    #V=V_harmonic(r,z,1,gamma)
+    V=V_box(r,z,box_size,gamma)
     
     dipoleConv=True
     j=0
@@ -198,44 +203,44 @@ for i in range(len(gammas)):
         # Imaginary time propagation
         
         while hasEnded==False and p<Nit: # Loop until convergence or limit reached
-                psi=expVh(psi,V,gs,Uddf,dt,J)*psi # Split step Fourier/Hankel method
-                psi=expT*fft(hankel.hankel(psi,J),axis=1)
-                psi/=norm(psi,r,z,N,max_z)
-                psi=ifft(hankel.invhankel(psi,J),axis=1)
-                psi/=norm(psi,r,z,N,max_z)
-                psi*=expVh(psi,V,gs,Uddf,dt,J)
-                psi/=norm(psi,r,z,N,max_z)
+            psi=expVh(psi,V,gs,Uddf,dt,J)*psi # Split step Fourier/Hankel method
+            psi=expT*fft(hankel.hankel(psi,J),axis=1)
+            psi/=norm(psi,r,z,N,max_z)
+            psi=ifft(hankel.invhankel(psi,J),axis=1)
+            psi/=norm(psi,r,z,N,max_z)
+            psi*=expVh(psi,V,gs,Uddf,dt,J)
+            psi/=norm(psi,r,z,N,max_z)
                 
                 
-                if p%10 == 0: # Will run every 10 iterations
-                    # Add energy of psi to an existing list
-                    energies.append(E(psi,N,max_r,max_z,V,Uddf,gs,Na,kmag,hankel,J))                  
+            if p%10 == 0: # Will run every 10 iterations
+                # Add energy of psi to an existing list
+                energies.append(E(psi,N,max_r,max_z,V,Uddf,gs,Na,kmag,hankel,J))                  
                         
-                    ## Convergence based on if wavefunction goes to NaN first
-                    if math.isnan(np.mean(psi)) == False:
+                ## Convergence based on if wavefunction goes to NaN first
+                if math.isnan(np.mean(psi)) == False:
                         
-                        val1=psi[0,int(N/2)] # Value of psi at r=0 and middle of z
-                        val2=psi[:,int(N/2)].max() # Max value of psi along middle of z
-                        max_psi_percent_diff=100*(val2-val1)/val1
-                        max_index=np.where(psi==psi.max())[0][0] # Index of max value
-                        # Checking for red blood cell by if centre value of psi is less than the max
-                        if max_psi_percent_diff > 5 and max_psi_percent_diff < 100 and max_index<N/2: # Peak needs to be near centre for red blood cell
-                            stable_matrix[i][j]=1 # Runs if red blood cell
+                    val1=psi[0,int(N/2)] # Value of psi at r=0 and middle of z
+                    val2=psi[:,int(N/2)].max() # Max value of psi along middle of z
+                    max_psi_percent_diff=100*(val2-val1)/val1
+                    max_index=np.where(psi==psi.max())[0][0] # Index of max value
+                    # Checking for red blood cell by if centre value of psi is less than the max
+                    if max_psi_percent_diff > 10  and max_psi_percent_diff < 100 and max_index<int(N): # Peak needs to be near centre for red blood cell
+                        stable_matrix[i][j]=1 # Runs if red blood cell
                         
-                        psi1d=sorted(psi.ravel()) # 1D sorted array of psi values
-                        max_1=psi1d[len(psi1d)-1] # Largest psi value
-                        max_2=psi1d[int(0.999*len(psi1d))] # 0.1% away from max largest psi value
-                        max_percent_diff=100*(max_1-max_2)/max_2
+                    psi1d=sorted(psi.ravel()) # 1D sorted array of psi values
+                    max_1=psi1d[len(psi1d)-1] # Largest psi value
+                    max_2=psi1d[int(0.999*len(psi1d))] # 0.1% away from max largest psi value
+                    max_percent_diff=100*(max_1-max_2)/max_2
                         
-                        if max_percent_diff > 1000: # Big spike but not NaN
-                            stable_matrix[i][j]=2 # Runs if wavefunction hasn't converged
-                            hasEnded=True
-            
-                    elif math.isnan(np.mean(psi)) == True:
+                    if max_percent_diff > 100: # Big spike but not NaN
                         stable_matrix[i][j]=2 # Runs if wavefunction hasn't converged
-                        hasEnded=True             
+                        hasEnded=True
+            
+                elif math.isnan(np.mean(psi)) == True:
+                    stable_matrix[i][j]=2 # Runs if wavefunction hasn't converged
+                    hasEnded=True             
                 
-                p+=1 # Increases iteration number by 1 each loop
+            p+=1 # Increases iteration number by 1 each loop
                 
         if j >= 3:
             if (stable_matrix[i][j-2:j+1] == [2,2,2]).all(): # Runs if no convergence 3 times in a row
@@ -261,4 +266,4 @@ plt.xlabel("$\gamma$")
 plt.ylabel("D")
 plt.show()
 
-#plt.plot(r[:,0],psi[:,int(N/2)]);
+plt.plot(r[:,0],psi[:,int(N/2)]);
