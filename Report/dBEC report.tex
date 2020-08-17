@@ -82,7 +82,7 @@ where
 \begin{equation*}
 V_{trap}(r) = 
 \begin{cases}
-0 & \text{for $r<\alpha$} \\
+0 & \text{for $r<\Omega$} \\
 \infty & \text{otherwise}
 \end{cases}
 \end{equation*}
@@ -94,7 +94,7 @@ V_{trap}(z)=\frac{1}{2} \frac{m^2w_{z}^2 L^4}{\hbar^2}z^2 \label{Vextbox}
  harmonic in the z axis.
 
 where \scalebox{1.2}{$g_{s}^{box} = \frac{4 \pi N a_s}{L}$}, \scalebox{1.2}{$D^{box} =  \frac{m N \mu_0 \bar{\mu}^2}{4\pi \hbar^2 L}$}
-and \scalebox{1.2}{$\alpha = \frac{R_{box}}{L}$}. The reason for doing this instead of simply having  \scalebox{1.2}{$R_{box} = L$}, where $R_{box}$ is 
+and \scalebox{1.2}{$\Omega = \frac{R_{box}}{L}$}. The reason for doing this instead of simply having  \scalebox{1.2}{$R_{box} = L$}, where $R_{box}$ is 
 the radius if the trap is explained in section [INSERT SECTION NAME].
 
 PLEASE CHECK IF THIS IS VALID
@@ -166,7 +166,7 @@ and
 \begin{equation}
 g_{n} = \int_{0}^{\beta}\rho g(\rho)J_{0}(\frac{\alpha_{n}\rho}{\beta})d\rho=\frac{1}{2\pi}f(\frac{\alpha_{n}}{2\pi\beta})
 \end{equation}
-where $\alpha_{n}$ are the real nonnegative roots of the derivative of the zero-order Bessel function, $\alpha_{0}=0$. We can truncate these infinite sums to finite ones by using the fact that if $\alpha_{N} >S$ where $S=2\pi b\beta$, both $f_{N}$ and $g_{N}$ are zero.
+where $\alpha_{n}$ are the real nonnegative roots of the derivative of the zero-order Bessel function, $\alpha_{0}=0$. We can truncate these infinite sums to finite ones by using the fact that if $\alpha_{N} =S$ where $S=2\pi b\beta$, both $f_{n}$ and $g_{N}$ are zero for $n>N$.
 
 Defining a change of variables, 
 \begin{equation}
@@ -262,13 +262,13 @@ J_{\nu-1}(z)+J_{\nu+1}(z) = \frac{2\nu}{z}J_{\nu}(z),
 \end{equation}
 Eq (4.12) simplifies to 
 \begin{equation}
-2\nu J'_{\nu}(r)-rJ_{\nu-1}(r)=0.
+2\nu J_{\nu}(r)-rJ_{\nu-1}(r)=0.
 \end{equation}
 This has to be solved numerically, but it's essentially equating two Bessel functions of adjacent order so we could write a function which takes the two bessel functions as arrays (with the $2\nu$ and r prefactors) and then takes one away from the other. The output would be an array of the r values when they're equal, which probably doesn't take long at all. Further to this, for a given $\nu$ this only has to be calculated once as it doesn't depend on any parameters of our system apart from the number of data points in our r array, which will be the number of roots we need. But again, a large number $N_{max}$ can be calculated so even if N is changed, provided $N<N_{max}$ the roots won't have to be recalculated.
 
 \subsection{The Form of the General Hankel Transform}
 
-If $\lambda_{\nu,N}>S$ where $S_{\nu}=2\pi b\beta_{\nu}$, both $f_{n}$ and  $g_{n}$ are zero for $n\geqslant\ N$. Defining a change of variables, (I realise this notation is poor because I've already used $\mathcal{F}_{\nu}$ to define f in bessel space, I can change this)
+If $\lambda_{\nu,N}=S$ where $S_{\nu}=2\pi b\beta_{\nu}$, both $f_{n}$ and  $g_{n}$ are zero for $n> N$. Defining a change of variables, (I realise this notation is poor because I've already used $\mathcal{F}_{\nu}$ to define f in bessel space, I can change this)
 \begin{equation}
 G_{\nu}(m) = \mathcal{F}_{\nu}(\frac{\lambda_{\nu,m}}{2\pi b})|J_{\nu}^{-1}(\lambda_{\nu,m})|\beta_{\nu}
 \end{equation}
@@ -286,10 +286,114 @@ where $C_{\nu,nm}$ are the elements of a transform matrix,
 \begin{equation}
 C_{\nu,nm} = \frac{2}{S_\nu}|J_{\nu}^{-1}(\lambda_{\nu,n})||J_{\nu}^{-1}(\lambda_{\nu,m})|J_{\nu}(\frac{\lambda_{\nu,n}\lambda_{\nu,m}}{S_\nu})
 \end{equation}
-For this to hold, the matrix C has to satisfy $CC =I$, and C is a function of S only so S must be chosen correctly. I haven't tried to work this out yet, but hopefully it's not too difficult. 
-\subsection{Application to the Split Step Method}
+For this to hold, the matrix C has to satisfy $CC =I$, and C is a function of S only so S must be chosen correctly. This can be done numerically by varying S until $det[CC^{T}]-1=0$, or by a more analytical approach. In the next section a semi-analytical solution is proposed. $S_{\nu}=\lambda_{\nu,N+1}$  will give enough accuracy for most simulations, as stated in ref[INSERT REFERENCE], although their structure is slightly different.
+\subsection{Finding the optimal value for $S_{\nu}$}
+One way to define an orthogonal matrix is $det[C] = \pm1$. One problem with using this definition is that the expression for the determinant of an N by N matrix isn't very nice. Another, more useful definition we can use is the fact that the columns or rows form an orthonormal basis, so if $C_{\nu}$ is orthogonal then
+\begin{equation}
+C_{\nu,i}\cdot C_{\nu,j}= \delta_{ij}.
+\end{equation}
+I will only refer to columns as $C_{\nu}$ is symmetric, so anything that is true for its columns is true for its rows. 
+Choosing two specific values for i and j, we can solve 
+\begin{equation}
+C_{\nu,n}(S_{\nu})\cdot C_{\nu,m}(S_{\nu})= \delta_{nm},
+\end{equation}
+for $S_{\nu}(n,m)$. Now if there exists an exact solution to 4.21, where 
+\begin{equation}
+C_{\nu,i}(S_{opt,\nu})\cdot C_{\nu,j}(S_{opt,\nu})= \delta_{ij},
+\end{equation}
+then this solution, $S_{opt,\nu}$, will be independent of any specific values of i and j. However, if both solution spaces for 4.21 and 4.22 are singular, then 
+\begin{equation}
+S_{\nu}(n,m) = S_{opt,\nu}.
+\end{equation}
+So as long as this holds, $S_{\nu}$ will be independent of n and m. This means that we can choose any two columns and solve 4.22 for $S_{\nu}$ giving an orthogonal transformation matrix $C_{\nu}(S_{\nu})$, provided both 4.21 and 4.22 are singular. First, to solve 4.22 we separate the n=m case.
 
-If the system doesn't have cylindrical symmetry, the problem will be 3d and we will have to consider the angular component. With respect to transforming to momentum space, we would have to apply a fourier transform along both the z and $\theta$ dimensions. No cut off will be needed for $\theta$, as despite needing periodicity for the fourier transform, this wouldn't be an approximation because the wave function will be periodic in $\theta$ by necessity. This means we can just use a cut off in the z direction, reducing the computational cost of this step. There is one complication when introducing $\theta$, which is the fact that the Bessel space which diagonalises the r component of the laplacian is dependent on the angular momentum of the wavefunction. In fact, the order of Bessel function which diagonalises the laplacian is equal to the angular momentum eigenvector. I can include the derivation of Bessel's equation with a general $\nu$ to show this if needed.This would mean that when we apply the Hankel transform along the r dimension, $\nu$ would be different for every "slice" of $\theta$. This seems to make things very complicated as hundreds of different $\nu$'s and thus different versions of the Hankel transform would be needed. Although, this wouldn't add any computational cost when running the code, because despite a different Hankel transform being called each time they each take the same computational time. The only real complication would be calculating each different C matrix and S value for every $\nu$, and the corresponding roots of eq(4.15) needed. The parameters these depend on are b and N (providing this is true for the optimal value of S, which we haven't calculated yet). So whenever these parameters are changed, a considerable amount of code would have to be run but these are rarely changed and the code probably wouldn't take that long anyway.
+\begin{equation}
+\frac{S^{2}_{\nu}J^{2}_{\nu}(\lambda_{\nu,k})}{4} = \sum_{i=0}^{N}J^{-2}_{\nu}(\lambda_{\nu,i})J^{2}_{\nu}\bigg(\frac{\lambda_{\nu,k}\lambda_{\nu,i}}{S_{\nu}}\bigg),
+\end{equation}
+\begin{multline}
+\frac{4}{S^{2}_{\nu}}|J^{-1}_{\nu}(\lambda_{\nu,n})||J^{-1}_{\nu}(\lambda_{\nu,m})|\\ \cdot\sum_{i=0}^{N}J^{-2}_{\nu}(\lambda_{\nu,i})J_{\nu}\bigg(\frac{\lambda_{\nu,n}\lambda_{\nu,i}}{S_{\nu}}\bigg)J_{\nu}\bigg(\frac{\lambda_{\nu,m}\lambda_{\nu,i}}{S_{\nu}}\bigg)=0, \\ (n,m,k = 0,1,2,...,N),
+\end{multline}
+where $n\neq m$ and 4.25 is the $n=m$ case. These are implicit equations for $S_{\nu}$, but $S_{\nu}$ can be extracted from within the argument of the bessel functions by employing a taylor expansion. Note that this the solution will no longer be exact as we are neglecting higher order terms. $\lambda_{\nu,N}<S_{\nu}<\lambda_{\nu,N+1}$ so we could taylor expand around $\lambda_{\nu,N}$ or $\lambda_{\nu,N+1}$. Due to the \scalebox{1.1}{$\frac{1}{S^{2}_{\nu}}$} expression in 4.26, it seems sensible that $S_{\nu}$ would be closer to  $\lambda_{\nu,N+1}$. Going to first order gives the following,
+\begin{equation}
+J_{\nu}\bigg(\frac{\lambda_{\nu,p}\lambda_{\nu,i}}{S_{\nu}}\bigg) = J_{\nu}\bigg(\frac{\lambda_{\nu,p}\lambda_{\nu,i}}{\lambda_{\nu,N+1}}\bigg) + \frac{\lambda_{\nu,p}\lambda_{\nu,i}}{\lambda^{2}_{\nu,N+1}} J'_{\nu}\bigg(\frac{\lambda_{\nu,p}\lambda_{\nu,i}}{\lambda_{\nu,N+1}}\bigg) \delta +...
+\end{equation}
+where $\delta=\lambda_{\nu,N+1}-S_{\nu}$. Substituting 4.27 into 4.25 and 4.26 and rearranging gives
+\begin{equation}
+\frac{S^{2}_{\nu}J^{2}_{\nu}(\lambda_{\nu,k})}{4} =  \Sigma_{1} + \frac{2\lambda_{\nu,k}\delta}{\lambda^{2}_{\nu,N+1}}\Sigma_{2},
+\end{equation}
+\begin{multline}
+\frac{4}{S^{2}_{\nu}}|J^{-1}_{\nu}(\lambda_{\nu,n})||J^{-1}_{\nu}(\lambda_{\nu,m})|\bigg[\Sigma_{3}+\frac{\delta}{\lambda^{2}_{\nu,N+1}}\Sigma_{4}\bigg]=0,
+\end{multline}
+respectively, where
+\begin{multline}
+\Sigma_{1} = \sum_{i=0}^{N}J^{-2}_{\nu}(\lambda_{\nu,i})J^{2}_{\nu}\bigg(\frac{\lambda_{\nu,k}\lambda_{\nu,i}}{\lambda_{\nu,N+1}}\bigg),\\
+\Sigma_{2} = \sum_{i=0}^{N}\lambda_{\nu,i}J^{-2}_{\nu}(\lambda_{\nu,i})J_{\nu}\bigg(\frac{\lambda_{\nu,k}\lambda_{\nu,i}}{\lambda_{\nu,N+1}}\bigg)J'_{\nu}\bigg(\frac{\lambda_{\nu,k}\lambda_{\nu,i}}{\lambda_{\nu,N+1}}\bigg),\\
+\Sigma_{3} = \sum_{i=0}^{N}J^{-2}_{\nu}(\lambda_{\nu,i})J_{\nu}\bigg(\frac{\lambda_{\nu,n}\lambda_{\nu,i}}{\lambda_{\nu,N+1}}\bigg)J_{\nu}\bigg(\frac{\lambda_{\nu,m}\lambda_{\nu,i}}{\lambda_{\nu,N+1}}\bigg),\\
+\Sigma_{4} = \sum_{i=0}^{N}J^{-2}_{\nu}(\lambda_{\nu,i})\lambda_{\nu,i}\bigg[\lambda_{\nu,m}J_{\nu}\bigg(\frac{\lambda_{\nu,n}\lambda_{\nu,i}}{\lambda_{\nu,N+1}}\bigg)J'_{\nu}\bigg(\frac{\lambda_{\nu,m}\lambda_{\nu,i}}{\lambda_{\nu,N+1}}\bigg)\\+\lambda_{\nu,n}J_{\nu}\bigg(\frac{\lambda_{\nu,m}\lambda_{\nu,i}}{\lambda_{\nu,N+1}}\bigg)J'_{\nu}\bigg(\frac{\lambda_{\nu,n}\lambda_{\nu,i}}{\lambda_{\nu,N+1}}\bigg)\bigg].
+\end{multline}
+Eq 4.28 is a quadratic in $S_{\nu}$ and gives the following solution,
+\begin{multline}
+S_{u,\nu} = \frac{4\lambda_{\nu,k}\Sigma_{2}}{\lambda^{2}_{\nu,N+1}J^{2}_{\nu}(\lambda_{\nu,k})} \\ \cdot\bigg[-1+\lambda_{\nu,N+1}\sqrt{1+\frac{\lambda_{\nu,N+1}J^{2}_{\nu}(\lambda_{\nu,k})}{2\lambda_{\nu,k}\Sigma_{2}}\bigg(1+\frac{\lambda_{\nu,N+1}}{2\lambda_{\nu,k}\Sigma_{2}}\Sigma_{1}\bigg)}\bigg],
+\end{multline}
+where the positive root has been taken as  $S_{\nu}>0$. 4.29 can be solved by setting the expression inside the brackets to zero, which gives,
+\begin{equation}
+S_{o,\nu} = \lambda_{\nu,N+1}\bigg(1+\lambda_{\nu,N+1}\frac{\Sigma_{3}}{\Sigma_{4}}\bigg).
+\end{equation}
+If $S_{\nu}=S_{o,\nu}$, all the columns and rows of $C_{\nu}$ will be (approximately) orthogonal. If $S_{\nu}=S_{u,\nu}$, all the columns and rows of $C_{\nu}$ will (approximately) have magnitude 1. The reason for this approximate solution comes from the finite Taylor expansion used, as the true solution will be when an infinite Taylor expansion is used. When the taylor expansion is first order only, both 4.31 and 4.32 are singular for a given n,m or k, so they must be (approximately) equal. If a higher order Taylor expansion was used, 4.31 and 4.32 may have multiple solutions for $\lambda_{\nu,N}<S_{\nu}<\lambda_{\nu,N+1}$, as they will be higher degree polynomials. If the solutions stayed singular within $\lambda_{\nu,N}<S_{\nu}<\lambda_{\nu,N+1}$, then
+\begin{equation}
+\lim_{\beta \to \infty}S_{o,\nu}= \lim_{\beta \to \infty}S_{u,\nu}=S_{opt,\nu},
+\end{equation}
+ where $\beta$ represents the order of the taylor expansion used, and $S_{opt,\nu}$ is the exact solution of 4.23. If we use a first order Taylor expansion only, expressions 4.31 and 4.32 will vary slightly for different values of n,m and k. These differences will be very small due to $\delta/\lambda_{\nu,N+1}\ll1$. So, even for $\beta=1$, 
+\begin{equation}
+S_{u,\nu}\approx S_{o,\nu}\approx S_{opt,\nu}.
+\end{equation}
+
+\subsection{Application to the Split Step Method}
+The way in which this transform is useful within the split step method is in diagonalising the laplacian operator. In cylindrical coordinates, the laplacian operator, $\mathcal{L}\{\psi\}=\nabla^{2}\psi(r,\theta,z)$ can be rewritten as
+\begin{equation}
+\mathcal{L}\{\psi\}=\frac{1}{r}\frac{\partial}{\partial r}\bigg(r\frac{\partial\psi}{\partial r}\bigg) \\
++ \frac{1}{r^{2}}\frac{\partial^{2}\psi}{\partial\theta^{2}} + \frac{\partial^{2}\psi}{\partial z^{2}}.
+\end{equation}
+By taking the separable ansatz in the form
+\begin{equation}
+\psi(r,\theta,z)=R(r)\Theta(\theta)Z(z)
+\end{equation}
+and applying the operator gives
+\begin{multline}
+\frac{\mathcal{L}\{\psi(r,\theta,z)\}}{\psi(r,\theta,z)}=\frac{1}{rR}\frac{\partial}{\partial r}\bigg(r\frac{\partial R}{\partial r}\bigg)
++ \frac{1}{r^{2}\Theta}\frac{\partial^{2}\Theta}{\partial\theta^{2}} + \frac{1}{Z}\frac{\partial^{2}Z}{\partial z^{2}}.
+\end{multline}
+The space where the RHS of 4.23 is constant is where $\mathcal{L}\{\psi\}$ is diagonal. As the second term is the only one which includes an angular component, it must be a constant function. I.e,
+\begin{equation}
+\frac{1}{\Theta}\frac{d^{2}\Theta}{d\theta^{2}}=-\nu^{2},
+\end{equation}
+where  $\nu\in\mathbb{Z}^{+}$ to satisfy the condition $\Theta(\theta+2n\pi)=\Theta(\theta), n\in\mathbb{Z}$. This gives oscillatory solutions and is diagonalised in fourier space. for a specific $\nu$, 4.23 becomes
+
+\begin{equation}
+\frac{\mathcal{L_{\nu}}\{\psi\}}{\psi}=\mathcal{R}\{R\}+\mathcal{Z}\{Z\}
+\end{equation}
+where 
+\begin{equation}
+\mathcal{R}_{\nu}\{R\}=\frac{1}{rR}\frac{\partial}{\partial r}\bigg(r\frac{\partial R}{\partial r}\bigg)-\frac{\nu^{2}}{r^{2}}
+\end{equation}
+and
+\begin{equation}
+\mathcal{Z}\{Z\}=\frac{1}{Z}\frac{\partial^{2}Z}{\partial z^{2}}.
+\end{equation}
+The space of functions that make 4.26 and 4.27 constant are 
+\begin{equation}
+\mathcal{R}_{\nu}\{J_{\nu}(k_{r}r)\}=-k^{2}_{r},
+\end{equation}
+\begin{equation}
+\mathcal{Z}\{e^{ik_{z}z}\}=-k^{2}_{z},
+\end{equation}
+So, for a given $\nu=\nu_{0}$, 
+\begin{equation}
+\mathcal{L}_{\nu_{0}}\{\psi(\textbf{r})\} \Rightarrow -(k^{2}_{z}+k^{2}_{r})\psi(\textbf{k},\nu=\nu_{0})
+\end{equation}
+where $\psi(\textbf{k},\nu=\nu_{0}) = \mathcal{F}_{z}\mathcal{H}_{\nu_{0}}\{\psi(\textbf{r})\}$. Obviously, this isn't the full laplacian as it's only diagonalising $\mathcal{L}$ for a specific 'slice' of $\nu$. In this structure, to fully diagonalise $\mathcal{L}_{3D}$ a fourier transform must be applied in both the $\theta$ and z direction. Then a different discrete Hankel transform 4.19 must be applied for each 'slice' of $\nu$ along the r direction to arrive at the correct Bessel space. In this range of frequency spaces, each $\mathcal{L}_{\nu}$ will be diagonal along the $k_{r}$ and $k_{z}$ directions, with the laplacian already diagonalised along the $\nu$ direction.
+ 
+This seems to make things very complicated as hundreds of different $\nu$'s and thus different versions of the Hankel transform would be needed. However, this wouldn't add any computational cost when running the code, because despite a different Hankel transform being called each time they each take the same computational time. The only real complication would be calculating each different C matrix and S value for every $\nu$, and the corresponding roots of eq(4.15) needed. The parameters these depend on are b and N (providing this is true for the optimal value of S, which we haven't calculated yet). So whenever these parameters are changed, a considerable amount of code would have to be run but these are rarely changed and the code probably wouldn't take that long anyway. No cut off will be needed for $\theta$, as despite needing periodicity for the fourier transform, this wouldn't be an approximation because the wave function will be periodic in $\theta$ by necessity. This means we can just use a cut off in the z direction, reducing the computational cost of this step. 
 
 
 \section{Convergence using imaginary time propagation and the split step Fourier/Hankel method}
@@ -512,12 +616,12 @@ Defining $\gamma$ in this way is completely analogous to the harmonic case, as f
 \begin{equation}
 \gamma = \frac{L^{2}}{l_{z}^{2}}.
 \end{equation}
-where L and $l_{z}$ are the length scales in the r and z direction respectively (\scalebox{1.1}{$l_{z} = \sqrt{\frac{\hbar}{m\omega_{z}}}$}). However, these don't equate to the same geometric situations as L represents a different fraction of the cloud size if it's defined to be the size of the trap. This means  the ranges of gamma for the two cases which equate to roughly the same geometric ratios will be different. To get round this, we can define the box potential length scale to be a fraction of the box size, so when $\gamma =1$ the height and width of the cloud will be approximately equal. This means that the ranges of gammas will equate to the same geometric ratios with this adjustment. 
+where L and $l_{z}$ are the length scales in the r and z direction respectively (\scalebox{1.1}{$l_{z} = \sqrt{\frac{\hbar}{m\omega_{z}}}$}). However, these don't equate to the same geometric situations. This is due to L representing a different fraction of the cloud size if it's defined to be the size of the trap. This means  the ranges of gamma for the two cases which equate to roughly the same geometric ratios will be different. To get round this, we can define the box potential length scale to be a fraction of the box size, so when $\gamma =1$ the height and width of the cloud will be approximately equal. This means that the ranges of gammas will equate to the same geometric ratios with this adjustment. 
 Going into dimensionless units and setting the size of the box to be $3L$, we achieve the following graph.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{box potential stability plot gamma = 10}
+\includegraphics[width=\linewidth]{high definition box stability plot}
 \caption{Stability plot of gamma against the dimensionless parameter D, with the size of the trap set to $3L$. White regions show stable areas. Red regions show stable areas, but with the maximum value of the wavefunction not at the centre. Black regions indicate instability.}
 \end{figure}
 
@@ -527,6 +631,11 @@ This diagram shows for low D the maximum density still lies in the middle (show 
 \includegraphics[width=\linewidth]{density oscillation}
 \caption{psi in the z=0 plane using a circular box potential, the maximum density is situated close to the edge of the cloud, where in this case $R_{box}=20L$.}
 \end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{purely dipolar with scaled fit}
+\caption{stability boundary for a purely dipolar gas, it appears that it's tending to Eq 11.2.}
+\end{figure}
 
 In [INSERT REFERENCE FOR NU PAPER] they predict for a gas unconfined in the r plane and harmonically confined in the z direction, that
 \begin{equation}
@@ -534,9 +643,9 @@ In [INSERT REFERENCE FOR NU PAPER] they predict for a gas unconfined in the r pl
 \end{equation} 
 on the stability boundary for a purely dipolar gas. This is shown from fig 5(b) IN REF [INSERT REFERENCE FOR NU PAPER] where it can be seen that for $g_{s} =0$,
 \begin{equation}
- \nu_{d}=const.
+ \frac{nC_{dd}}{3\hbar\omega_{z}l_{z}}=const.
 \end{equation}
-From this (10.2) can be derived. It follows from this that as the size of our box increases, it would seem sensible for our stability plot to tend to (10.2). Figure 14 seems to show that this might be true for high gamma, but a more conclusive plot is definitely needed. There seems to be the opposite relationship for lower gamma, as can be shown by figure 16 which used \scalebox{1.1}{$R_{box}=20L$}, but this may just be a problem with the code. Over the next week or so we should be able to get some better plots, these are really just giving a rough idea of what it looks like.
+From this (11.2) can be derived. It follows from this that as the size of our box increases, it would seem sensible for our stability plot to tend to (11.2). Figure 14 seems to show that this might be true for high gamma, but a more conclusive plot is definitely needed. There seems to be the opposite relationship for lower gamma, as can be shown by figure 16 which used \scalebox{1.1}{$R_{box}=20L$}, but this may just be a problem with the code. Over the next week or so we should be able to get some better plots, these are really just giving a rough idea of what it looks like.
 
 \begin{figure}[H]
 \centering
@@ -552,14 +661,17 @@ We can also analyse the stability of the gas outside the purely dipolar regime. 
 \begin{equation}
 \nu_{d} = \frac{nC_{dd}}{3\hbar\omega_{z}l_{z}}
 \end{equation} 
-These are equavalent to equations (6) and (16) respectively in [INSERT REFERENCE FOR NU PAPER] with $\alpha=0$.
-Rewriting them in terms of our dimensionless variables, we get the following expressions:
+These are equavalent to equations (6) and (16) respectively in [INSERT REFERENCE FOR NU PAPER] with $\alpha=0$. If we assume that the gas is uniform in the r direction we can rewrite them in our dimensionless variables. Obviously this is not true at the edge of the gas, but as the gas becomes larger in the r direction the edge becomes insignificant. With this assumption, i.e. 
+ \begin{equation}
+n = \frac{N}{\pi(\Omega L)^{2}}
+\end{equation} 
+we get the following expressions:
 
  \begin{equation}
-\nu = \frac{(3g_{s}+8\pi D)l_{z}}{3\pi L}
+\nu = \frac{(3g_{s}+8\pi D)l_{z}}{3\pi L\Omega^{2}}
 \end{equation} 
 \begin{equation}
-\nu_{d} = \frac{4Dl_{z}}{3L}
+\nu_{d} = \frac{4Dl_{z}}{3L\Omega^{2}}
 \end{equation} 
 For $\gamma=100$ we achieve good agreement with the unconfined case.
 
@@ -569,13 +681,21 @@ For $\gamma=100$ we achieve good agreement with the unconfined case.
 \caption{stability boundary, where for any $\nu_{d}$ above the boundary, the BEC becomes unstable. We see our results are in good agreement with the unconfined case, The labels are the wrong way round, nu should be the x axis.}
 \end{figure}
 
-For $\gamma=10$, the stability boundary starts to deviate from the unconfined case and it seems it increase in stability for a given \scalebox{1.1}{$\nu$}. Again, this is only a rough idea of what happens as $\gamma$ decreases, hopefully we will have more conclusive plots by the end of the week.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{stability boundary gamma=10}
-\caption{We see that the stability boundary may be higher for a lower gamma, when the unconfined approximation is no longer valid.}
+\includegraphics[width=\linewidth]{gamma =10}
+\caption{We see that the unconfined approximation seems to hold for gamma =10.}
 \end{figure}
+
+For very low $\gamma$ the stability boundary starts to deviate from the unconfined case and it seems it decrease in stability for a given \scalebox{1.1}{$\nu$}.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{gamma = 3}
+\caption{We see that the unconfined approximation starts to break down at very low gamma.}
+\end{figure}
+
+None of these plots are conclusive, and they all deviate from the unconfined case at low $\nu$, and potentially for very high $\nu$ also. To have a better comparison we should have plots all with the same range which is easily done. 
 
 \section{Issues}
 One issue we seem to be getting is that the code doesn't work for very high $\gamma$. One reason is my idea that the time scale was independent of $\gamma$ may be incorrect, as by dividing dt by $\gamma$ seems to give more sensible results at very high $\gamma$. However this does increase computational time due to more iterations being needed for convergence with low dt. But even accounting for this, there still seems to be issues for very high $\gamma$. My guess at the moment is a floating point precision error, as for some calculations we are using variables that are proportional to $\gamma^{2}$ along with variables that are not. This may lead to a loss of information. This is the main justification for having the length scale be a fraction of the box size rather than the box size itself, as lower gammas are needed to achieve the same geometric situations. It seems strange that a precision error would lead to large differences, but I can't see any other reason for this and the code clearly works very well for sensible ranges of $\gamma$. 
