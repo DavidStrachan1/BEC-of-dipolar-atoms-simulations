@@ -129,16 +129,18 @@ hankel=hankel_class(N,max_r) # Create instance of hankel transform with set para
 
 ### Stability stuff
 
-size=80
+size=150
 
 dipoles=np.linspace(0,200,size)
 #contacts=np.linspace(0,3000,10)
 gammas=np.linspace(1,20,size)
 
-dipoles=[0]
-gammas=[1]
+#dipoles=[0]
+#gammas=[1]
 
 stable_matrix=np.zeros([size,size]) # Stability matrix (starts off assuming convergence)
+
+conv_boundary=[]
 
 for i in range(len(gammas)):
     
@@ -241,6 +243,11 @@ for i in range(len(gammas)):
                     hasEnded=True             
                 
             p+=1 # Increases iteration number by 1 each loop
+            
+            
+        if j>0:   
+            if (stable_matrix[i][j-1:j+1]==[0,2]).all(): # Finds the boundary between convergence and non convergence
+                conv_boundary.append(D)    
                 
         if j >= 3:
             if (stable_matrix[i][j-2:j+1] == [2,2,2]).all(): # Runs if no convergence 3 times in a row
@@ -256,14 +263,18 @@ gammas=np.array(gammas)
 dipoles=np.array(dipoles)
 
 # Plot heatmap
-dipole_columns=np.max(dipoles)-dipoles # Flips order of dipoles
+dipole_columns=np.max(dipoles)-dipoles
 ax = sns.heatmap(np.rot90(stable_matrix), xticklabels=gammas, yticklabels=dipole_columns);
-ax.set_xticks(ax.get_xticks()[::2].round(1));
-ax.set_xticklabels(gammas[::2].round(1),rotation=45, horizontalalignment='right');
-ax.set_yticks(ax.get_yticks()[::2].astype(int));
-ax.set_yticklabels(dipole_columns[::2].astype(int),rotation=0, horizontalalignment='right');
+ax.set_xticks(ax.get_xticks()[::5].round(1));
+ax.set_xticklabels(gammas[::5].round(1),rotation=45, horizontalalignment='right');
+ax.set_yticks(ax.get_yticks()[::5].astype(int));
+ax.set_yticklabels(dipole_columns[::5].astype(int),rotation=45, horizontalalignment='right');
 plt.xlabel("$\gamma$")
 plt.ylabel("D")
 plt.show()
+
+plt.plot(gammas,conv_boundary)
+plt.xlabel("$\gamma$")
+plt.ylabel("D")
 
 plt.plot(r[:,0],psi[:,int(N/2)]);
