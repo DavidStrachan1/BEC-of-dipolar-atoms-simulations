@@ -128,17 +128,19 @@ max_r=1.2*box_size
 hankel=hankel_class(N,max_r) # Create instance of hankel transform with set parameters
 ### Stability stuff
 
-size=10
+size=150
 
 dipoles=np.linspace(0,200,size)
 #contacts=np.linspace(0,3000,10)
 gammas=np.linspace(1,20,size)
 
-#dipoles=[0,30]
-#gammas=[1]
+#dipoles=[0,50,100]
+#gammas=[1,10]
 
 #dipoles=[160]
 #gammas=[20]
+
+conv_boundary=[]
 
 stable_matrix=np.zeros([size,size])+2 # Stability matrix (starts off assuming no convergence)
 
@@ -207,12 +209,14 @@ for i in range(len(gammas)):
         # Imaginary time propagation
         
         while hasEnded==False and p<Nit: # Loop until convergence or limit reached
+        
+            #dt=-0.05j*gamma**(-0.5)
             
             """
             if p<int(0.75*Nit): # For large p, dt then decreases
-                dt=-0.1j/gamma
+                dt=-0.1j*gamma**(-0.5)
             else:
-                dt=-0.01j/gamma
+                dt=-0.01j*gamma**(-0.5)
             """
         
             psi=expVh(psi,V,gs,Uddf,dt,J)*psi # Split step Fourier/Hankel method
@@ -251,7 +255,8 @@ for i in range(len(gammas)):
                             
                             # Checking for red blood cell by if centre value of psi is less than the max
                             if max_psi_percent_diff > 10 and max_psi_percent_diff<100 and max_index<N/2: # Peak needs to be near centre for red blood cell
-                                stable_matrix[i][j]=1 # Runs if red blood cell    
+                                #stable_matrix[i][j]=1 # Runs if red blood cell
+                                pass
                                 
                             hasEnded=True
                             
@@ -265,10 +270,12 @@ for i in range(len(gammas)):
                 elif math.isnan(np.mean(psi)) == True:
                     stable_matrix[i][j]=2 # Runs if wavefunction hasn't converged
                     hasEnded=True
-                    
-                 
-                
+                           
             p+=1 # Increases iteration number by 1 each loop
+            
+        if j>0:   
+            if (stable_matrix[i][j-1:j+1]==[0,2]).all(): # Finds the boundary between convergence and non convergence
+                conv_boundary.append(D)
                 
         if j >= 3:
             if (stable_matrix[i][j-2:j+1] == [2,2,2]).all(): # Runs if no convergence 3 times in a row
@@ -285,12 +292,16 @@ dipoles=np.array(dipoles)
 # Plot heatmap
 dipole_columns=np.max(dipoles)-dipoles
 ax = sns.heatmap(np.rot90(stable_matrix), xticklabels=gammas, yticklabels=dipole_columns);
-ax.set_xticks(ax.get_xticks()[::2].round(1));
-ax.set_xticklabels(gammas[::2].round(1),rotation=45, horizontalalignment='right');
-ax.set_yticks(ax.get_yticks()[::2].astype(int));
-ax.set_yticklabels(dipole_columns[::2].astype(int),rotation=45, horizontalalignment='right');
+ax.set_xticks(ax.get_xticks()[::5].round(1));
+ax.set_xticklabels(gammas[::5].round(1),rotation=45, horizontalalignment='right');
+ax.set_yticks(ax.get_yticks()[::5].astype(int));
+ax.set_yticklabels(dipole_columns[::5].astype(int),rotation=45, horizontalalignment='right');
 plt.xlabel("$\gamma$")
 plt.ylabel("D")
 plt.show()
+
+plt.plot(gammas,conv_boundary)
+plt.xlabel("$\gamma$")
+plt.ylabel("D")
 
 plt.plot(r[:,0],psi[:,int(N/2)]);
